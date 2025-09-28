@@ -1,0 +1,42 @@
+# Flutter/Dart specific
+**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Flutter cache directory
+/flutter/
+
+# iOS specific
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/ephemeral
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Pods/
+
+# Android specific
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.*
+
+# macOS specific
+.DS_Store
+**/macos/Flutter/ephemeral
+
+# Firebase config
+google-services.json
+GoogleService-Info.plist
+
+# IDE specific
+.idea/
+.vscode/
+*.iml
