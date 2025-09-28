@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'service_detail_screen.dart';
 
 class CustomerBrowseServicesScreen extends StatelessWidget {
   @override
@@ -31,7 +32,14 @@ class CustomerBrowseServicesScreen extends StatelessWidget {
                       ? Icon(Icons.photo_camera)
                       : null,
                   onTap: () {
-                    // TODO: Navigate to service details with 360 viewer or booking
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ServiceDetailScreen(
+                          serviceDoc: services[index],
+                        ),
+                      ),
+                    );
                   },
                 ),
               );
