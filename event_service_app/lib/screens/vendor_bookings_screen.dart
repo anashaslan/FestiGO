@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class VendorBookingsScreen extends StatelessWidget {
+  const VendorBookingsScreen({super.key});
+
   Future<void> _updateBookingStatus(String bookingId, String status) async {
     try {
       await FirebaseFirestore.instance.collection('bookings').doc(bookingId).update({

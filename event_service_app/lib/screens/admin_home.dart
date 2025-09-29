@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminHomeScreen extends StatelessWidget {
+  const AdminHomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

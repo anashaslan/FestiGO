@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'service_detail_screen.dart';
 
 class CustomerBrowseServicesScreen extends StatefulWidget {
+  const CustomerBrowseServicesScreen({super.key});
+
   @override
   _CustomerBrowseServicesScreenState createState() => _CustomerBrowseServicesScreenState();
 }
@@ -45,8 +47,9 @@ class _CustomerBrowseServicesScreenState extends State<CustomerBrowseServicesScr
                   .where('price', isLessThanOrEqualTo: _maxPrice)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData)
+                if (!snapshot.hasData) {
                   return Center(child: CircularProgressIndicator());
+                }
 
                 final services = snapshot.data!.docs;
 

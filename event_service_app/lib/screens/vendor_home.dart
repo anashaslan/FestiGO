@@ -6,6 +6,8 @@ import 'edit_service_screen.dart';
 import 'vendor_bookings_screen.dart';
 
 class VendorHomeScreen extends StatelessWidget {
+  const VendorHomeScreen({super.key});
+
   Future<void> _deleteService(String serviceId, BuildContext context) async {
     try {
       await FirebaseFirestore.instance

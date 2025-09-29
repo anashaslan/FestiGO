@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class EditServiceScreen extends StatefulWidget {
   final DocumentSnapshot serviceDoc;
 
-  EditServiceScreen({required this.serviceDoc});
+  const EditServiceScreen({super.key, required this.serviceDoc});
 
   @override
   _EditServiceScreenState createState() => _EditServiceScreenState();
@@ -99,7 +99,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(),

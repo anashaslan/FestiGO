@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VendorServiceRegistrationScreen extends StatefulWidget {
+  const VendorServiceRegistrationScreen({super.key});
+
   @override
   _VendorServiceRegistrationScreenState createState() => _VendorServiceRegistrationScreenState();
 }
@@ -90,7 +92,7 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),

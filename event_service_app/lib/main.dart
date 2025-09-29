@@ -18,6 +18,8 @@ Future<void> main() async {
 }
 
 class FestiGO extends StatelessWidget {
+  const FestiGO({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,6 +35,8 @@ class FestiGO extends StatelessWidget {
 }
 
 class AuthenticationWrapper extends StatefulWidget {
+  const AuthenticationWrapper({super.key});
+
   @override
   _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
 }

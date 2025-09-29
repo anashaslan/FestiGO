@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 class ServiceDetailScreen extends StatelessWidget {
   final DocumentSnapshot serviceDoc;
 
-  ServiceDetailScreen({required this.serviceDoc});
+  const ServiceDetailScreen({super.key, required this.serviceDoc});
 
   Future<void> bookService(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
