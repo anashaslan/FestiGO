@@ -5,20 +5,32 @@ import 'vendor_service_registration_screen.dart';
 import 'edit_service_screen.dart';
 import 'vendor_bookings_screen.dart';
 
-class VendorHomeScreen extends StatelessWidget {
+class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
 
+  @override
+  State<VendorHomeScreen> createState() => _VendorHomeScreenState();
+}
+
+class _VendorHomeScreenState extends State<VendorHomeScreen> {
   Future<void> _deleteService(String serviceId, BuildContext context) async {
+    // Check if the widget is still in the tree before and after the async gap.
+    if (!mounted) return;
+
     try {
       await FirebaseFirestore.instance
           .collection('services')
           .doc(serviceId)
           .delete();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Service deleted')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Service deleted')));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+      }
     }
   }
 
