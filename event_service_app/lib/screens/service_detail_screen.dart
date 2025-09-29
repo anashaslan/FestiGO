@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ServiceDetailScreen extends StatelessWidget {
   final DocumentSnapshot serviceDoc;
@@ -51,8 +52,15 @@ class ServiceDetailScreen extends StatelessWidget {
             SizedBox(height: 20),
             data['venue360Url'] != null && data['venue360Url'].isNotEmpty
                 ? ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement 360 view
+                    onPressed: () async {
+                      final url = Uri.parse(data['venue360Url']);
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Could not open 360° view')),
+                        );
+                      }
                     },
                     child: Text('View Venue 360'))
                 : Container(),
