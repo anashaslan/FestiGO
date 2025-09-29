@@ -12,22 +12,29 @@ class ServiceDetailScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please login first')));
+        SnackBar(content: Text('Please login first')),
+      );
       return;
     }
+
     try {
       await FirebaseFirestore.instance.collection('bookings').add({
         'serviceId': serviceDoc.id,
         'vendorId': serviceDoc['vendorId'],
         'customerId': user.uid,
+        'customerEmail': user.email,
+        'serviceName': serviceDoc['serviceName'],
+        'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending'
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Booking requested!')));
+        SnackBar(content: Text('Booking request sent! Waiting for vendor confirmation.')),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Booking failed: $e')));
+        SnackBar(content: Text('Booking failed: $e')),
+      );
     }
   }
 
