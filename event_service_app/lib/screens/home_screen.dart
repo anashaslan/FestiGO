@@ -2,7 +2,6 @@ import 'package:event_service_app/screens/vendor_home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'vendor_service_registration_screen.dart';
 import 'customer_browse_services_screen.dart';
 
 class HomeScreen extends StatefulWidget {
