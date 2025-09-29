@@ -63,6 +63,9 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
       _venue360Controller.clear();
       _otherCategoryController.clear();
 
+      // Add this navigation code
+      Navigator.of(context).pop(); // This will return to the vendor dashboard
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error registering service: $e')));
     } finally {
