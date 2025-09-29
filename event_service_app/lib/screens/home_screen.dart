@@ -1,3 +1,4 @@
+import 'package:event_service_app/screens/vendor_home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _userRole == 'customer'
           ? CustomerBrowseServicesScreen()
-          : VendorServiceRegistrationScreen(),
+          : VendorHomeScreen(),
     );
   }
 }
