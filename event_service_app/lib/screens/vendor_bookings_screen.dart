@@ -52,48 +52,62 @@ class VendorBookingsScreen extends StatelessWidget {
               final booking = bookings[index].data() as Map<String, dynamic>;
               final bookingId = bookings[index].id;
 
-              return Card(
-                margin: EdgeInsets.all(8),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        booking['serviceName'] ?? 'Unknown Service',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Status: ${booking['status']}'),
-                      Text('Date: ${booking['createdAt']?.toDate().toString() ?? 'Unknown'}'),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('services')
+                    .doc(booking['serviceId'])
+                    .get(),
+                builder: (context, serviceSnapshot) {
+                  if (!serviceSnapshot.hasData) {
+                    return Card(child: ListTile(title: Text('Loading...')));
+                  }
+
+                  final serviceData = serviceSnapshot.data!.data() as Map<String, dynamic>;
+
+                  return Card(
+                    margin: EdgeInsets.all(8),
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (booking['status'] == 'pending') ...[
-                            ElevatedButton(
-                              onPressed: () => _updateBookingStatus(bookingId, 'confirmed'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                              ),
-                              child: Text('Confirm'),
+                          Text(
+                            serviceData['serviceName'] ?? 'Unknown Service',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                            ElevatedButton(
-                              onPressed: () => _updateBookingStatus(bookingId, 'rejected'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                              ),
-                              child: Text('Reject'),
-                            ),
-                          ],
+                          ),
+                          SizedBox(height: 8),
+                          Text('Status: ${booking['status']}'),
+                          Text('Date: ${booking['createdAt']?.toDate().toString() ?? 'Unknown'}'),
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              if (booking['status'] == 'pending') ...[
+                                ElevatedButton(
+                                  onPressed: () => _updateBookingStatus(bookingId, 'confirmed'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                  ),
+                                  child: Text('Confirm'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _updateBookingStatus(bookingId, 'rejected'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: Text('Reject'),
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
           );
