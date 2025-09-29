@@ -5,6 +5,20 @@ import 'vendor_service_registration_screen.dart';
 import 'edit_service_screen.dart';
 
 class VendorHomeScreen extends StatelessWidget {
+  Future<void> _deleteService(String serviceId, BuildContext context) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('services')
+          .doc(serviceId)
+          .delete();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Service deleted')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -34,7 +48,6 @@ class VendorHomeScreen extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('services')
             .where('vendorId', isEqualTo: user?.uid)
-            // Remove the orderBy clause temporarily until index is ready
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -46,14 +59,6 @@ class VendorHomeScreen extends StatelessWidget {
           }
 
           final services = snapshot.data?.docs ?? [];
-
-          // Sort the services locally instead
-          services.sort((a, b) {
-            final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
-            final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
-            if (aTime == null || bTime == null) return 0;
-            return bTime.compareTo(aTime); // Descending order
-          });
 
           if (services.isEmpty) {
             return Center(
@@ -115,23 +120,31 @@ class VendorHomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Category: ${service['category'] ?? 'Uncategorized'}'),
-                      Text(
-                          'Price: \$${service['price']?.toStringAsFixed(2) ?? '0.00'}'),
+                      Text('Price: \$${service['price']?.toStringAsFixed(2) ?? '0.00'}'),
                     ],
                   ),
                   isThreeLine: true,
-                  trailing: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditServiceScreen(
-                            serviceDoc: services[index],
-                          ),
-                        ),
-                      );
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditServiceScreen(
+                                serviceDoc: services[index],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteService(services[index].id, context),
+                      ),
+                    ],
                   ),
                 ),
               );

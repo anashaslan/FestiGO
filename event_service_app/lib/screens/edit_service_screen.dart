@@ -69,6 +69,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         'category': _selectedCategory == 'Others'
             ? _otherCategoryController.text
             : _selectedCategory,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context)
@@ -85,7 +86,13 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Service')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text('Edit Service'),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
