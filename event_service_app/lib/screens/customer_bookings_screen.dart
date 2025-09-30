@@ -21,9 +21,14 @@ class CustomerBookingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
+    // Prevent the query from running if the user is null.
+    if (user == null) {
+      return const Center(child: Text('Please log in to see your bookings.'));
+    }
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('Cust-bookings')
+          .collection('bookings')
           .where('customerId', isEqualTo: user?.uid)
           .orderBy('createdAt', descending: true)
           .snapshots(),
@@ -75,4 +80,3 @@ class CustomerBookingsScreen extends StatelessWidget {
     );
   }
 }
-

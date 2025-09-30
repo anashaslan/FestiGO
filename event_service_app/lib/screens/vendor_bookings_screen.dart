@@ -21,6 +21,11 @@ class VendorBookingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
+    // Prevent the query from running if the user is null.
+    if (user == null) {
+      return const Center(child: Text('Please log in to see your bookings.'));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Manage Bookings'),
