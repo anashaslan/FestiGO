@@ -23,7 +23,7 @@ class CustomerBookingsScreen extends StatelessWidget {
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('bookings')
+          .collection('Cust-bookings')
           .where('customerId', isEqualTo: user?.uid)
           .orderBy('createdAt', descending: true)
           .snapshots(),
