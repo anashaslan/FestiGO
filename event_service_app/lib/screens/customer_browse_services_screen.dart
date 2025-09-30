@@ -14,8 +14,7 @@ class _CustomerBrowseServicesScreenState extends State<CustomerBrowseServicesScr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Browse Services')),
+    return Scaffold(      
       body: Column(
         children: [
           Padding(
