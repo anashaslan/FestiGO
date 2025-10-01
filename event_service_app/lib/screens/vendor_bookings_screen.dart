@@ -33,7 +33,7 @@ class VendorBookingsScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('bookings')
-            .where('vendorId', isEqualTo: user?.uid)
+            .where('vendorId', isEqualTo: user.uid)
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {

@@ -26,8 +26,8 @@ class _CustomerBrowseServicesScreenState extends State<CustomerBrowseServicesScr
                   child: Slider(
                     value: _maxPrice,
                     min: 0,
-                    max: 5000,
-                    divisions: 50,
+                    max: 20000,
+                    divisions: 100,
                     label: _maxPrice.toInt().toString(),
                     onChanged: (value) {
                       setState(() {
