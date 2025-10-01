@@ -2,7 +2,7 @@ import 'package:event_service_app/screens/vendor_home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'customer_browse_services_screen.dart';
+import 'customer_home.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Welcome ${_userRole == 'vendor' ? 'Vendor' : 'Customer'}'),
       ),
       body: _userRole == 'customer'
-          ? CustomerBrowseServicesScreen()
+          ? CustomerHomeScreen()
           : VendorHomeScreen(),
     );
   }

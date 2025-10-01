@@ -9,6 +9,7 @@ import 'screens/vendor_home.dart';
 import 'screens/admin_home.dart';
 import 'screens/login_screen.dart';
 import 'services/notification_service.dart';
+import 'services/global_navigator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,8 @@ class FestiGO extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: GlobalNavigator.navigatorKey,
+      scaffoldMessengerKey: GlobalNavigator.scaffoldMessengerKey,
       title: 'FestiGo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

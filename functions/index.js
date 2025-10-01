@@ -46,6 +46,7 @@ exports.onBookingStatusChange = functions.firestore
       data: {
         // You can add extra data here to handle navigation on tap
         bookingId: context.params.bookingId,
+        type: 'booking_update',
         click_action: "FLUTTER_NOTIFICATION_CLICK",
       },
     };
@@ -56,6 +57,62 @@ exports.onBookingStatusChange = functions.firestore
       console.log("Successfully sent message:", response);
     } catch (error) {
       console.log("Error sending message:", error);
+    }
+
+    return null;
+  });
+
+exports.onBookingCreated = functions.firestore
+  .document("bookings/{bookingId}")
+  .onCreate(async (snapshot, context) => {
+    const bookingData = snapshot.data();
+
+    const vendorId = bookingData.vendorId;
+    const serviceName = bookingData.serviceName;
+    const customerEmail = bookingData.customerEmail;
+
+    if (!vendorId) {
+      console.log("Booking created without a vendorId, cannot send notification.");
+      return null;
+    }
+
+    // Get the vendor's user document to find their FCM token
+    const userDoc = await admin
+      .firestore()
+      .collection("users")
+      .doc(vendorId)
+      .get();
+
+    if (!userDoc.exists) {
+      console.log("User document not found for vendorId:", vendorId);
+      return null;
+    }
+
+    const fcmToken = userDoc.data().fcmToken;
+    if (!fcmToken) {
+      console.log("FCM token not found for vendorId:", vendorId);
+      return null;
+    }
+
+    // Construct the notification message
+    const message = {
+      notification: {
+        title: "New Booking Request",
+        body: `You have a new booking for "${serviceName}" from ${customerEmail}.`,
+      },
+      token: fcmToken,
+      data: {
+        bookingId: context.params.bookingId,
+        type: 'new_booking',
+        click_action: "FLUTTER_NOTIFICATION_CLICK",
+      },
+    };
+
+    try {
+      await admin.messaging().send(message);
+      console.log("Successfully sent new booking notification to vendor.");
+    } catch (error) {
+      console.log("Error sending new booking notification:", error);
     }
 
     return null;

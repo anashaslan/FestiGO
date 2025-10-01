@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'vendor_booking_detail_screen.dart';
 
 class VendorBookingsScreen extends StatelessWidget {
   const VendorBookingsScreen({super.key});
 
-  Future<void> _updateBookingStatus(String bookingId, String status) async {
-    try {
-      await FirebaseFirestore.instance.collection('bookings').doc(bookingId).update({
-        'status': status,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      
-    } catch (e) {
-      print('Error updating booking: $e');
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'confirmed':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'pending':
+      default:
+        return Colors.orange;
     }
   }
 
@@ -28,7 +30,7 @@ class VendorBookingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Bookings'),
+        title: const Text('Manage Bookings'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -42,7 +44,7 @@ class VendorBookingsScreen extends StatelessWidget {
           }
 
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           final bookings = snapshot.data!.docs;
@@ -56,63 +58,36 @@ class VendorBookingsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final booking = bookings[index].data() as Map<String, dynamic>;
               final bookingId = bookings[index].id;
+              final createdAt = (booking['createdAt'] as Timestamp?)?.toDate();
+              final formattedDate = createdAt != null
+                  ? DateFormat.yMMMd().format(createdAt)
+                  : 'N/A';
 
-              return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('services')
-                    .doc(booking['serviceId'])
-                    .get(),
-                builder: (context, serviceSnapshot) {
-                  if (!serviceSnapshot.hasData) {
-                    return Card(child: ListTile(title: Text('Loading...')));
-                  }
-
-                  final serviceData = serviceSnapshot.data!.data() as Map<String, dynamic>;
-
-                  return Card(
-                    margin: EdgeInsets.all(8),
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            serviceData['serviceName'] ?? 'Unknown Service',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text('Status: ${booking['status']}'),
-                          Text('Date: ${booking['createdAt']?.toDate().toString() ?? 'Unknown'}'),
-                          SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (booking['status'] == 'pending') ...[
-                                ElevatedButton(
-                                  onPressed: () => _updateBookingStatus(bookingId, 'confirmed'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                  ),
-                                  child: Text('Confirm'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => _updateBookingStatus(bookingId, 'rejected'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  child: Text('Reject'),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: Text(booking['serviceName'] ?? 'Unknown Service'),
+                  subtitle: Text(
+                    'From: ${booking['customerEmail'] ?? 'N/A'}\nBooked on: $formattedDate',
+                  ),
+                  isThreeLine: true,
+                  trailing: Chip(
+                    label: Text(
+                      booking['status'] ?? 'pending',
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  );
-                },
+                    backgroundColor: _getStatusColor(booking['status'] ?? 'pending'),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            VendorBookingDetailScreen(bookingId: bookingId),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );
