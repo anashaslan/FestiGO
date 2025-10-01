@@ -49,7 +49,7 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
 
     try {
       await FirebaseFirestore.instance.collection('services').add({
-        'vendorID': user.uid,
+        'vendorId': user.uid,
         'serviceName': _serviceNameController.text,
         'description': _descriptionController.text,
         'price': double.parse(_priceController.text),
