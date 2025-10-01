@@ -8,6 +8,7 @@ import 'screens/customer_home.dart';
 import 'screens/vendor_home.dart';
 import 'screens/admin_home.dart';
 import 'screens/login_screen.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,7 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
       } else {
         // Fetch role from Firestore
         var doc = await FirebaseFirestore.instance
+
             .collection('users')
             .doc(user.uid)
             .get();
@@ -67,6 +69,8 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
           _role = doc.data()?['role'] ?? 'customer';
           _loading = false;
         });
+        // Initialize notifications for the logged-in user
+        await NotificationService().initNotifications();
       }
     });
   }
