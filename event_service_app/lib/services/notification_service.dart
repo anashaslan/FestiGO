@@ -94,8 +94,8 @@ class NotificationService {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
           'fcmToken': token,
         });
-      } catch (e, s) {
-        if (kDebugMode) {
+      } catch (e) {
+        if (kDebugMode) { 
           print('Could not save FCM token to database: $e');
         }
       }

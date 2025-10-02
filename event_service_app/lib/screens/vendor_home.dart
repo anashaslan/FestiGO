@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'vendor_service_registration_screen.dart';
 import 'edit_service_screen.dart';
 import 'vendor_bookings_screen.dart';
+import 'vendor_chats_list_screen.dart';
 
 class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
@@ -39,13 +40,14 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Vendor Dashboard'),
           bottom: TabBar(
             tabs: [
               Tab(text: 'Services'),
+              Tab(text: 'Chats'),
               Tab(text: 'Bookings'),
             ],
           ),
@@ -181,6 +183,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                 );
               },
             ),
+            VendorChatsListScreen(),
             VendorBookingsScreen(),
           ],
         ),
