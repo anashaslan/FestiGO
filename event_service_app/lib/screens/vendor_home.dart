@@ -1,3 +1,4 @@
+import 'package:event_service_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,6 +36,17 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     }
   }
 
+  Future<void> _signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      // Navigate to the Login Screen and remove all previous routes
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -65,7 +77,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
             ),
             IconButton(
               icon: Icon(Icons.logout),
-              onPressed: () => FirebaseAuth.instance.signOut(),
+              onPressed: () => _signOut(context),
             ),
           ],
         ),
