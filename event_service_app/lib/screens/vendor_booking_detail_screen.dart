@@ -24,7 +24,7 @@ class _VendorBookingDetailScreenState extends State<VendorBookingDetailScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking has been ${status}.')),
+        SnackBar(content: Text('Booking has been $status.')),
       );
       // Refresh the UI after updating
       setState(() {});
