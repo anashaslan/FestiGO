@@ -16,7 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(FestiGO());
+  runApp(const FestiGO());
 }
 
 class FestiGO extends StatelessWidget {
@@ -33,66 +33,111 @@ class FestiGO extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 153, 36, 248),
         ),
       ),
-      home: AuthenticationWrapper(),
+      home: const AuthenticationWrapper(),
     );
   }
 }
 
-class AuthenticationWrapper extends StatefulWidget {
+class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({super.key});
 
   @override
-  _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // ADDED: Debug logging
+        print('Auth state: ${snapshot.connectionState}, Has  ${snapshot.hasData}, User: ${snapshot.data?.email}');
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          print('No user logged in, showing LoginScreen');
+          return const LoginScreen();
+        }
+
+        print('User logged in: ${snapshot.data!.email}, loading role...');
+        // CRITICAL FIX: Add ValueKey to force rebuild when user changes
+        return RoleBasedHomeScreen(
+          key: ValueKey(snapshot.data!.uid), // Forces new widget when UID changes
+          userId: snapshot.data!.uid,
+        );
+      },
+    );
+  }
 }
 
-class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
-  User? _user;
-  String? _role;
-  bool _loading = true;
+class RoleBasedHomeScreen extends StatefulWidget {
+  final String userId;
+  const RoleBasedHomeScreen({super.key, required this.userId});
 
+  @override
+  State<RoleBasedHomeScreen> createState() => _RoleBasedHomeScreenState();
+}
+
+class _RoleBasedHomeScreenState extends State<RoleBasedHomeScreen> {
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((user) async {
-      if (user == null) {
-        setState(() {
-          _user = null;
-          _role = null;
-          _loading = false;
-        });
-      } else {
-        // Fetch role from Firestore
-        var doc = await FirebaseFirestore.instance
+    _initializeServices();
+  }
 
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        setState(() {
-          _user = user;
-          _role = doc.data()?['role'] ?? 'customer';
-          _loading = false;
-        });
-        // Initialize notifications for the logged-in user
-        await NotificationService().initNotifications();
+  Future<void> _initializeServices() async {
+    try {
+      await NotificationService().initNotifications();
+    } catch (e) {
+      print("Error initializing notification service: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not initialize notifications.')),
+        );
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    if (_user == null) {
-      return LoginScreen();
-    }
-    switch (_role) {
-      case 'vendor':
-        return VendorHomeScreen();
-      case 'admin':
-        return AdminHomeScreen();
-      default:
-        return CustomerHomeScreen();
-    }
+    return FutureBuilder<DocumentSnapshot>(
+      // CRITICAL FIX: Add key to force refresh when userId changes
+      key: ValueKey(widget.userId),
+      future: FirebaseFirestore.instance.collection('users').doc(widget.userId).get(),
+      builder: (context, roleSnapshot) {
+        print('FutureBuilder state: ${roleSnapshot.connectionState}');
+        
+        if (roleSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (roleSnapshot.hasError) {
+          print('Error loading user role: ${roleSnapshot.error}');
+          FirebaseAuth.instance.signOut();
+          return const Scaffold(
+            body: Center(child: Text('Error loading user data. Please log in again.')),
+          );
+        }
+
+        if (!roleSnapshot.hasData || !roleSnapshot.data!.exists) {
+          print('User document does not exist for UID: ${widget.userId}');
+          FirebaseAuth.instance.signOut();
+          return const Scaffold(
+            body: Center(child: Text('User data not found. Please log in again.')),
+          );
+        }
+
+        final role = roleSnapshot.data!.get('role') as String? ?? 'customer';
+        print('User role loaded: $role for UID: ${widget.userId}');
+        
+        switch (role) {
+          case 'vendor':
+            return const VendorHomeScreen();
+          case 'admin':
+            return const AdminHomeScreen();
+          default:
+            return const CustomerHomeScreen();
+        }
+      },
+    );
   }
 }

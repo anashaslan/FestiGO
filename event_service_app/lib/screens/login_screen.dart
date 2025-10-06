@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';  // Add this import
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'registration_screen.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,43 +16,48 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _showRegistration = false;
 
-  Future<void> login() async {
-    setState(() => _isLoading = true);
-    try {
-      // Sign in user
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim());
+// In lib/screens/login_screen.dart
 
-      // Get current user
-      final user = FirebaseAuth.instance.currentUser;
-      
-      // First check if user document exists
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
+// In lib/screens/login_screen.dart
 
+Future<void> login() async {
+  if (!mounted) return;
+  setState(() => _isLoading = true);
+
+  try {
+    // Sign in user
+    final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim());
+
+    // After sign-in, check for user document in Firestore.
+    if (userCredential.user != null) {
+      final userDocRef = FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid);
+      final userDoc = await userDocRef.get();
+
+      // If the document does not exist, create it with a default 'customer' role.
       if (!userDoc.exists) {
-        // Only create document if it doesn't exist
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
-          'email': user.email,
+        await userDocRef.set({
+          'email': userCredential.user!.email,
+          'name': userCredential.user!.email?.split('@')[0] ?? 'New User', // A sensible default name
+          'role': 'customer', // Default to 'customer' on login-creation
           'createdAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+        });
       }
+    }
+    // No navigation is needed here. The AuthenticationWrapper will handle it.
 
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => HomeScreen()));
-    } on FirebaseAuthException catch (e) {
+  } on FirebaseAuthException catch (e) {
+    if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(e.message ?? 'Login Failed')));
-    } finally {
+    }
+  } finally {
+    if (mounted) {
       setState(() => _isLoading = false);
     }
   }
+}
 
   void toggle() {
     setState(() {

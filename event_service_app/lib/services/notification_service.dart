@@ -28,16 +28,6 @@ class NotificationService {
     // 2. THIS IS THE FIX: On iOS, explicitly get the APNS token first.
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       String? apnsToken = await _firebaseMessaging.getAPNSToken();
-      if (apnsToken == null) {
-        print('Failed to get APNS token, trying again...');
-        // Wait a moment and try again, as it can sometimes be delayed
-        await Future.delayed(const Duration(seconds: 1));
-        apnsToken = await _firebaseMessaging.getAPNSToken();
-        if (apnsToken == null) {
-          print('Error: Could not get an APNS token.');
-          return; // Exit if the token is still unavailable
-        }
-      }
     }
 
     // 3. Now that we've waited for the APNS token on iOS, it is safe to get the FCM token.

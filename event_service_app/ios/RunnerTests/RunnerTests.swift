@@ -1,12 +1,11 @@
 import Flutter
 import UIKit
 import XCTest
+@testable import Runner
 
 class RunnerTests: XCTestCase {
-
-  func testExample() {
-    // If you add code to the Runner application, consider adding tests here.
-    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+  // This is a basic test to ensure the app can be loaded.
+  func testAppCanLoad() {
+    XCTAssertNotNil(UIApplication.shared.delegate as? AppDelegate)
   }
-
 }

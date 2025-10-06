@@ -37,15 +37,11 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   }
 
   Future<void> _signOut(BuildContext context) async {
+    print('Vendor logging out...');
     await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      // Navigate to the Login Screen and remove all previous routes
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (Route<dynamic> route) => false,
-      );
-    }
+    print('Vendor logout complete - StreamBuilder will handle navigation');
   }
+
 
   @override
   Widget build(BuildContext context) {

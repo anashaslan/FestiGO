@@ -15,6 +15,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
+  // FIXED: Removed manual navigation
+  Future<void> _signOut(BuildContext context) async {
+    print('Customer logging out...');
+    await FirebaseAuth.instance.signOut();
+    print('Customer logout complete - StreamBuilder will handle navigation');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,7 +50,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => FirebaseAuth.instance.signOut(),
+            onPressed: () => _signOut(context),
           ),
         ],
       ),
