@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'customer_browse_services_screen.dart';
 import 'customer_bookings_screen.dart';
+import 'customer_wishlist_screen.dart';
+import 'customer_chats_list_screen.dart';
+import 'customer_profile_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -11,11 +14,16 @@ class CustomerHomeScreen extends StatefulWidget {
   State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
 }
 
-class _CustomerHomeScreenState extends State<CustomerHomeScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
+  int _selectedIndex = 0;
 
-  // FIXED: Removed manual navigation
+  final List<Widget> _screens = const [
+    CustomerBrowseServicesScreen(),
+    CustomerWishlistScreen(),
+    CustomerChatsListScreen(),
+    CustomerProfileScreen(),
+  ];
+
   Future<void> _signOut(BuildContext context) async {
     print('Customer logging out...');
     await FirebaseAuth.instance.signOut();
@@ -25,40 +33,43 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-        length: 2, vsync: this, initialIndex: widget.initialTabIndex);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    _selectedIndex = widget.initialTabIndex;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FestiGO'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.search), text: 'Browse'),
-            Tab(icon: Icon(Icons.history), text: 'My Bookings'),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _signOut(context),
-          ),
-        ],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          CustomerBrowseServicesScreen(),
-          CustomerBookingsScreen()
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Wishlist',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );
