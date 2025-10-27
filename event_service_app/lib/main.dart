@@ -7,7 +7,7 @@ import 'firebase_options.dart';
 import 'screens/customer_home.dart';
 import 'screens/vendor_home.dart';
 import 'screens/admin_home.dart';
-import 'screens/login_screen.dart';
+import 'screens/welcome_screen.dart'; // ADDED
 import 'services/notification_service.dart';
 import 'services/global_navigator.dart';
 
@@ -32,6 +32,7 @@ class FestiGO extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 153, 36, 248),
         ),
+        useMaterial3: true,
       ),
       home: const AuthenticationWrapper(),
     );
@@ -46,22 +47,21 @@ class AuthenticationWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // ADDED: Debug logging
         print('Auth state: ${snapshot.connectionState}, Has  ${snapshot.hasData}, User: ${snapshot.data?.email}');
         
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
+        // MODIFIED: Show welcome screen if no user is logged in
         if (!snapshot.hasData || snapshot.data == null) {
-          print('No user logged in, showing LoginScreen');
-          return const LoginScreen();
+          print('No user logged in, showing WelcomeScreen');
+          return const WelcomeScreen(); // Changed from LoginScreen
         }
 
-        print('User logged in: ${snapshot.data!.email}, loading role...');
-        // CRITICAL FIX: Add ValueKey to force rebuild when user changes
+        print('User logged in: ${snapshot.data!.email ?? snapshot.data!.phoneNumber}, loading role...');
         return RoleBasedHomeScreen(
-          key: ValueKey(snapshot.data!.uid), // Forces new widget when UID changes
+          key: ValueKey(snapshot.data!.uid),
           userId: snapshot.data!.uid,
         );
       },
@@ -69,6 +69,7 @@ class AuthenticationWrapper extends StatelessWidget {
   }
 }
 
+// Rest of your RoleBasedHomeScreen code remains the same...
 class RoleBasedHomeScreen extends StatefulWidget {
   final String userId;
   const RoleBasedHomeScreen({super.key, required this.userId});
@@ -100,7 +101,6 @@ class _RoleBasedHomeScreenState extends State<RoleBasedHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
-      // CRITICAL FIX: Add key to force refresh when userId changes
       key: ValueKey(widget.userId),
       future: FirebaseFirestore.instance.collection('users').doc(widget.userId).get(),
       builder: (context, roleSnapshot) {

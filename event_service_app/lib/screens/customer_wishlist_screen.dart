@@ -117,10 +117,10 @@ class CustomerWishlistScreen extends StatelessWidget {
                             // Service Image
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: service['venue360Url'] != null &&
-                                      (service['venue360Url'] as String).isNotEmpty
-                                  ? Image.network(
-                                      service['venue360Url'],
+                               child: service['imageUrl'] != null &&
+                                       (service['imageUrl'] as String).isNotEmpty
+                                   ? Image.network(
+                                       service['imageUrl'],
                                       width: 80,
                                       height: 80,
                                       fit: BoxFit.cover,

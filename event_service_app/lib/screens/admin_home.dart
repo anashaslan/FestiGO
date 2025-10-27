@@ -157,7 +157,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           color: isSelected ? Colors.deepPurple : Colors.black,
         ),
       ),
-      tileColor: isSelected ? Colors.deepPurple.withOpacity(0.1) : null,
+      tileColor: isSelected ? Colors.deepPurple.withValues(alpha: 0.1) : null,
       onTap: () {
         // Handle navigation later
       },

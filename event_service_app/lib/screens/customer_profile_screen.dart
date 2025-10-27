@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'customer_settings_screen.dart';
 import 'customer_bookings_screen.dart';
-
+import 'customer_wishlist_screen.dart';
 class CustomerProfileScreen extends StatelessWidget {
   const CustomerProfileScreen({super.key});
 
@@ -102,7 +102,7 @@ class CustomerProfileScreen extends StatelessWidget {
 
           final userData = userSnapshot.data ?? {};
           final name = userData['name'] ?? 'User';
-          final email = userData['email'] ?? user.email ?? 'No email';
+
           final location = userData['location'] ?? 'Kuala Lumpur, Malaysia';
           final createdAt = userData['createdAt'] as Timestamp?;
 
@@ -223,7 +223,12 @@ class CustomerProfileScreen extends StatelessWidget {
                   title: 'Wishlist',
                   subtitle: 'Your saved services',
                   onTap: () {
-                    // Navigate to wishlist (already in bottom nav)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CustomerWishlistScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

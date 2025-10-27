@@ -141,7 +141,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final description = service['description'] as String? ?? 'No description available';
     final price = service['price'] as num? ?? 0;
     final category = service['category'] as String?;
-    final venue360Url = service['venue360Url'] as String?;
+    final imageUrl = service['imageUrl'] as String?;
+    final venue360ImageUrl = service['venue360ImageUrl'] as String?;
 
     return Scaffold(
       appBar: AppBar(
@@ -163,12 +164,27 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Service Image/360 View
-            if (venue360Url != null && venue360Url.isNotEmpty)
+            // Service Image
+            if (imageUrl != null && imageUrl.isNotEmpty)
+              Image.network(
+                imageUrl,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 200,
+                  color: Colors.grey.shade300,
+                  child: const Center(
+                    child: Icon(Icons.broken_image, size: 64),
+                  ),
+                ),
+              ),
+            // Venue 360 Image
+            if (venue360ImageUrl != null && venue360ImageUrl.isNotEmpty)
               Stack(
                 children: [
                   Image.network(
-                    venue360Url,
+                    venue360ImageUrl,
                     width: double.infinity,
                     height: 250,
                     fit: BoxFit.cover,
@@ -191,8 +207,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        if (venue360Url.isNotEmpty) {
-                          _launchUrl(venue360Url);
+                        if (venue360ImageUrl.isNotEmpty) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => Dialog(
+                              child: Image.network(venue360ImageUrl),
+                            ),
+                          );
                         }
                       },
                     ),
@@ -400,17 +421,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                     final chatId = await _createOrGetChat(
                         vendorId, user.uid, serviceName);
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            chatId: chatId,
-                            serviceName: serviceName,
-                          ),
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          chatId: chatId,
+                          serviceName: serviceName,
                         ),
-                      );
-                    }
+                      ),
+                    );
                   },
                 ),
               ),
@@ -448,15 +468,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       'createdAt': FieldValue.serverTimestamp(),
                     });
 
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Booking request sent!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pop(context);
-                    }
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Booking request sent!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    Navigator.pop(context);
                   },
                 ),
               ),

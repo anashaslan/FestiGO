@@ -333,37 +333,37 @@ class _CustomerBrowseServicesScreenState
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
                             children: [
-                              // Service Image
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: service['venue360Url'] != null &&
-                                        (service['venue360Url'] as String).isNotEmpty
-                                    ? Image.network(
-                                        service['venue360Url'],
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            Container(
-                                          width: 80,
-                                          height: 80,
-                                          color: Colors.grey.shade300,
-                                          child: const Icon(Icons.broken_image),
-                                        ),
-                                      )
-                                    : Container(
-                                        width: 80,
-                                        height: 80,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primaryContainer,
-                                        child: Icon(
-                                          Icons.event,
-                                          size: 40,
-                                          color: Theme.of(context).colorScheme.primary,
-                                        ),
-                                      ),
-                              ),
+                               // Service Image
+                               ClipRRect(
+                                 borderRadius: BorderRadius.circular(8),
+                                 child: service['imageUrl'] != null &&
+                                         (service['imageUrl'] as String).isNotEmpty
+                                     ? Image.network(
+                                         service['imageUrl'],
+                                         width: 80,
+                                         height: 80,
+                                         fit: BoxFit.cover,
+                                         errorBuilder: (context, error, stackTrace) =>
+                                             Container(
+                                           width: 80,
+                                           height: 80,
+                                           color: Colors.grey.shade300,
+                                           child: const Icon(Icons.broken_image),
+                                         ),
+                                       )
+                                     : Container(
+                                         width: 80,
+                                         height: 80,
+                                         color: Theme.of(context)
+                                             .colorScheme
+                                             .primaryContainer,
+                                         child: Icon(
+                                           Icons.event,
+                                           size: 40,
+                                           color: Theme.of(context).colorScheme.primary,
+                                         ),
+                                       ),
+                               ),
                               const SizedBox(width: 12),
                               
                               // Service Details

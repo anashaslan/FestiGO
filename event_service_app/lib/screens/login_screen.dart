@@ -45,7 +45,10 @@ Future<void> login() async {
         });
       }
     }
-    // No navigation is needed here. The AuthenticationWrapper will handle it.
+    // Navigation: Pop the login screen since AuthenticationWrapper will handle showing the home screen
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
 
   } on FirebaseAuthException catch (e) {
     if (mounted) {
@@ -70,7 +73,14 @@ Future<void> login() async {
     return _showRegistration
         ? RegistrationScreen(onLoginClicked: toggle)
         : Scaffold(
-            appBar: AppBar(title: Text('Login')),
+            appBar: AppBar(
+              title: Text('Login'),
+              // ADDED: Allow going back to welcome screen
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
             body: Padding(
                 padding: EdgeInsets.all(16),
                 child: Column(

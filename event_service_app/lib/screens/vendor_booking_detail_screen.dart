@@ -23,6 +23,7 @@ class _VendorBookingDetailScreenState extends State<VendorBookingDetailScreen> {
         'status': status,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Booking has been $status.')),
       );

@@ -83,6 +83,9 @@ class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
 
     if (confirm == true) {
       await FirebaseAuth.instance.signOut();
+      if (mounted) {
+        Navigator.pop(context); // Pop settings screen after logout
+      }
     }
   }
 
@@ -459,20 +462,18 @@ class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
                   // Update password
                   await user.updatePassword(newPasswordController.text);
 
-                  if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password updated successfully')),
-                    );
-                  }
-                }
-              } catch (e) {
-                if (mounted) {
+                  if (!mounted) return;
+                  Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    const SnackBar(content: Text('Password updated successfully')),
                   );
                 }
-              }
+               } catch (e) {
+                 if (!mounted) return;
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   SnackBar(content: Text('Error: $e')),
+                 );
+               }
             },
             child: const Text('Update'),
           ),
@@ -520,14 +521,13 @@ class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
                   'status': 'pending',
                 });
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Report submitted. We will review it shortly.'),
-                    ),
-                  );
-                }
+                if (!mounted) return;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Report submitted. We will review it shortly.'),
+                  ),
+                );
               }
             },
             child: const Text('Submit'),

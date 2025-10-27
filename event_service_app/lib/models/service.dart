@@ -7,6 +7,7 @@ class Service {
   final String description;
   final double price;
   final String? venue360Url;
+  final String? imageUrl;
   final String category;
 
   Service({
@@ -16,6 +17,7 @@ class Service {
     required this.description,
     required this.price,
     this.venue360Url,
+    this.imageUrl,
     required this.category,
   });
 
@@ -26,9 +28,10 @@ class Service {
       vendorId: data['vendorId'] ?? '',
       serviceName: data['serviceName'] ?? 'Unnamed Service',
       description: data['description'] ?? '',
-      price: (data['price'] as num?)?.toDouble() ?? 0.0,
-      venue360Url: data['venue360Url'],
-      category: data['category'] ?? 'Uncategorized',
+       price: (data['price'] as num?)?.toDouble() ?? 0.0,
+       venue360Url: data['venue360Url'],
+       imageUrl: data['imageUrl'],
+       category: data['category'] ?? 'Uncategorized',
     );
   }
 
@@ -37,9 +40,10 @@ class Service {
       'vendorId': vendorId,
       'serviceName': serviceName,
       'description': description,
-      'price': price,
-      'venue360Url': venue360Url,
-      'category': category,
+       'price': price,
+       'venue360Url': venue360Url,
+       'imageUrl': imageUrl,
+       'category': category,
     };
   }
 }

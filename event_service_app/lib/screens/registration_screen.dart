@@ -109,9 +109,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       'Select Role:',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Row(
+                    Column(
                       children: [
-                        Radio<String>(
+                        RadioListTile<String>(
+                          title: const Text('Customer'),
                           value: 'customer',
                           groupValue: _selectedRole,
                           onChanged: (value) {
@@ -120,9 +121,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             });
                           },
                         ),
-                        const Text('Customer'),
-                        const SizedBox(width: 16),
-                        Radio<String>(
+                        RadioListTile<String>(
+                          title: const Text('Vendor'),
                           value: 'vendor',
                           groupValue: _selectedRole,
                           onChanged: (value) {
@@ -131,7 +131,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             });
                           },
                         ),
-                        const Text('Vendor'),
                       ],
                     ),
                   ],

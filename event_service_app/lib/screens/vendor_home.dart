@@ -23,15 +23,13 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
           .collection('services')
           .doc(serviceId)
           .delete();
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Service deleted')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Service deleted')));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
     }
   }
 
@@ -130,17 +128,17 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                     return Card(
                       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
-                        leading: service['venue360Url'] != null &&
-                                service['venue360Url'].isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: Image.network(
-                                  service['venue360Url'],
-                                  width: 56,
-                                  height: 56,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
+                         leading: service['imageUrl'] != null &&
+                                 service['imageUrl'].isNotEmpty
+                             ? ClipRRect(
+                                 borderRadius: BorderRadius.circular(4),
+                                 child: Image.network(
+                                   service['imageUrl'],
+                                   width: 56,
+                                   height: 56,
+                                   fit: BoxFit.cover,
+                                 ),
+                               )
                             : Container(
                                 width: 56,
                                 height: 56,

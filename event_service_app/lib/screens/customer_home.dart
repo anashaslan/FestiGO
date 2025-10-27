@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'customer_browse_services_screen.dart';
-import 'customer_bookings_screen.dart';
 import 'customer_wishlist_screen.dart';
 import 'customer_chats_list_screen.dart';
 import 'customer_profile_screen.dart';
@@ -24,11 +23,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     CustomerProfileScreen(),
   ];
 
-  Future<void> _signOut(BuildContext context) async {
-    print('Customer logging out...');
-    await FirebaseAuth.instance.signOut();
-    print('Customer logout complete - StreamBuilder will handle navigation');
-  }
+
 
   @override
   void initState() {
