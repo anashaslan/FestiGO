@@ -18,7 +18,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   final _serviceNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _otherCategoryController = TextEditingController();
+
   
   XFile? _serviceImage;
   XFile? _venue360Image;
@@ -28,15 +28,12 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   bool _isSubmitting = false;
 
   final List<String> _categories = [
-    'Photography/Videography',
-    'Pelamin',
-    'Bunga Telor',
-    'Kad Jemputan',
-    'Kompang',
-    'Baju Pengantin',
-    'Emcee',
-    'Catering',
-    'Others'
+    'COMMUNITY AND PUBLIC',
+    'CORPORATE & BUSINESS',
+    'EDUCATION & SCHOOL',
+    'ENTERTAINMENT & STAGES',
+    'PERSONAL & FAMILY',
+    'OTHERS & CUSTOM'
   ];
   late String _selectedCategory;
   bool _showOtherCategory = false;
@@ -52,11 +49,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     _currentVenue360ImageUrl = data['venue360ImageUrl'];
     _selectedCategory = _categories.contains(data['category'])
         ? data['category']
-        : 'Others';
-    if (_selectedCategory == 'Others') {
-      _otherCategoryController.text = data['category'] ?? '';
-      _showOtherCategory = true;
-    }
+        : 'OTHERS & CUSTOM';
+    // No special handling needed for the new categories
   }
 
   Future<void> _pickServiceImage() async {
@@ -143,9 +137,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         'price': double.parse(_priceController.text),
         'imageUrl': serviceImageUrl,
         'venue360ImageUrl': venue360ImageUrl,
-        'category': _selectedCategory == 'Others'
-            ? _otherCategoryController.text
-            : _selectedCategory,
+        'category': _selectedCategory,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -192,21 +184,12 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedCategory = newValue!;
-                  _showOtherCategory = newValue == 'Others';
+                  _showOtherCategory = false;
                 });
               },
             ),
             SizedBox(height: 16),
-            if (_showOtherCategory) ...[
-              TextField(
-                controller: _otherCategoryController,
-                decoration: InputDecoration(
-                 labelText: 'Specify Category',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-            ],
+
             TextField(
               controller: _serviceNameController,
               decoration: InputDecoration(
@@ -328,7 +311,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     _serviceNameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _otherCategoryController.dispose();
+
     super.dispose();
   }
 }

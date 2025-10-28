@@ -20,12 +20,12 @@ class _CustomerBrowseServicesScreenState
 
   final List<String> _categories = [
     'All',
-    'Catering',
-    'Photography',
-    'Venue',
-    'Entertainment',
-    'Decoration',
-    'Planning',
+    'COMMUNITY AND PUBLIC',
+    'CORPORATE & BUSINESS',
+    'EDUCATION & SCHOOL',
+    'ENTERTAINMENT & STAGES',
+    'PERSONAL & FAMILY',
+    'OTHERS & CUSTOM',
   ];
 
   @override

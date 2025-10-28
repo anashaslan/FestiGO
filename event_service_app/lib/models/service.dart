@@ -31,7 +31,7 @@ class Service {
        price: (data['price'] as num?)?.toDouble() ?? 0.0,
        venue360Url: data['venue360Url'],
        imageUrl: data['imageUrl'],
-       category: data['category'] ?? 'Uncategorized',
+       category: data['category'] ?? 'OTHERS & CUSTOM',
     );
   }
 

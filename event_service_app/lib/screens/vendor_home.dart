@@ -152,8 +152,8 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                                'Category: ${service['category'] ?? 'Uncategorized'}'),
+                             Text(
+                                 'Category: ${service['category'] ?? 'OTHERS & CUSTOM'}'),
                             Text(
                                 'Price: \$${service['price']?.toStringAsFixed(2) ?? '0.00'}'),
                           ],

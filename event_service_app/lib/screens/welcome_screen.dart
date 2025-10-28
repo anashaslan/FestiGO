@@ -104,34 +104,36 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     children: [
                       // App Icon/Logo
                       Container(
-                        width: 150,
-                        height: 150,
+                        width: 200,
+                        height: 200,
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 20,
+                              blurRadius: 25,
                               spreadRadius: 5,
                             ),
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(60),
-                          child: Image.network(
-                            'https://firebasestorage.googleapis.com/v0/b/eventserviceapp-6ff7a.firebasestorage.app/o/assets%2Flogo-FestiGO.png?alt=media&token=0d17ae2c-87e8-48c5-b7da-927e8460bbf6',
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              // Fallback to original icon if image fails to load
-                              return Icon(
-                                Icons.celebration,
-                                size: 60,
-                                color: Theme.of(context).colorScheme.primary,
-                              );
-                            },
+                          borderRadius: BorderRadius.circular(75),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Image.asset(
+                              'assets/images/logo-FestiGO.png',
+                              fit: BoxFit.contain,
+                              // Optional: Add error handling for development
+                              errorBuilder: (context, error, stackTrace) {
+                                debugPrint('🔴 Asset load error: $error');
+                                return Icon(
+                                  Icons.celebration,
+                                  size: 80,
+                                  color: Theme.of(context).colorScheme.primary,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

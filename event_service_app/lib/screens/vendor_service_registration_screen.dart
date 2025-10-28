@@ -21,18 +21,14 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
   XFile? _venue360Image;
 
   final List<String> _categories = [
-    'Photography/Videography',
-    'Pelamin',
-    'Bunga Telor',
-    'Kad Jemputan',
-    'Kompang',
-    'Baju Pengantin',
-    'Emcee',
-    'Catering',
-    'Others'
+    'COMMUNITY AND PUBLIC',
+    'CORPORATE & BUSINESS',
+    'EDUCATION & SCHOOL',
+    'ENTERTAINMENT & STAGES',
+    'PERSONAL & FAMILY',
+    'OTHERS & CUSTOM'
   ];
-  String _selectedCategory = 'Photography/Videography';
-  final _otherCategoryController = TextEditingController();
+  String _selectedCategory = 'COMMUNITY AND PUBLIC';
   bool _showOtherCategory = false;
 
   bool _isSubmitting = false;
@@ -123,7 +119,7 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
         'price': double.parse(_priceController.text),
         'imageUrl': serviceImageUrl,
         'venue360ImageUrl': venue360ImageUrl,
-        'category': _selectedCategory == 'Others' ? _otherCategoryController.text : _selectedCategory,
+        'category': _selectedCategory,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -132,7 +128,6 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
       _serviceNameController.clear();
       _descriptionController.clear();
       _priceController.clear();
-      _otherCategoryController.clear();
       setState(() {
         _serviceImage = null;
         _venue360Image = null;
@@ -151,7 +146,6 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
 
   @override
   void dispose() {
-    _otherCategoryController.dispose();
     super.dispose();
   }
 
@@ -180,21 +174,13 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
                 onChanged: (String? newValue) {
                   setState(() {
                     _selectedCategory = newValue!;
-                    _showOtherCategory = newValue == 'Others';
+                    _showOtherCategory = false;
                   });
                 },
               ),
               SizedBox(height: 10),
               
-              if (_showOtherCategory)
-                TextField(
-                  controller: _otherCategoryController,
-                  decoration: InputDecoration(
-                    labelText: 'Specify Category',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              if (_showOtherCategory) SizedBox(height: 10),
+
 
               TextField(
                 controller: _serviceNameController,
