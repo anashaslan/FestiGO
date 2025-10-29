@@ -12,7 +12,7 @@ class CustomerBrowseServicesScreen extends StatefulWidget {
 
 class _CustomerBrowseServicesScreenState
     extends State<CustomerBrowseServicesScreen> {
-  double _maxPrice = 20000;
+  double _maxPrice = 200000;
   String? _selectedCategory;
   String _searchQuery = '';
   DateTime? _selectedDate;
@@ -64,7 +64,7 @@ class _CustomerBrowseServicesScreenState
                     onPressed: () {
                       setModalState(() {
                         _selectedCategory = null;
-                        _maxPrice = 20000;
+                        _maxPrice = 200000;
                         _selectedDate = null;
                       });
                       setState(() {});
@@ -104,7 +104,7 @@ class _CustomerBrowseServicesScreenState
               Slider(
                 value: _maxPrice,
                 min: 0,
-                max: 20000,
+                max: 200000,
                 divisions: 100,
                 label: 'RM${_maxPrice.toInt()}',
                 onChanged: (value) {

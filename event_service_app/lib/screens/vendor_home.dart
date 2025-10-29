@@ -5,6 +5,7 @@ import 'vendor_service_registration_screen.dart';
 import 'edit_service_screen.dart';
 import 'vendor_bookings_screen.dart';
 import 'vendor_chats_list_screen.dart';
+import 'vendor_profile_screen.dart';
 
 class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
@@ -45,7 +46,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Vendor Dashboard'),
@@ -54,6 +55,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
               Tab(text: 'Services'),
               Tab(text: 'Chats'),
               Tab(text: 'Bookings'),
+              Tab(text: 'Profile'),
             ],
           ),
           actions: [
@@ -190,6 +192,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
             ),
             VendorChatsListScreen(),
             VendorBookingsScreen(),
+            VendorProfileScreen(),
           ],
         ),
       ),

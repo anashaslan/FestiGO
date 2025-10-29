@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/booking.dart';
+import 'submit_review_screen.dart';
 
 class CustomerBookingsScreen extends StatefulWidget {
   const CustomerBookingsScreen({super.key});
@@ -123,8 +124,49 @@ class _CustomerBookingsScreenState extends State<CustomerBookingsScreen> {
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             child: ListTile(
                               title: Text(booking.serviceName),
-                              subtitle: Text(
-                                'Booked on: ${booking.formattedDate}',
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Booked on: ${booking.formattedDate}',
+                                  ),
+                                  if (booking.status == 'confirmed')
+                                    FutureBuilder<bool>(
+                                      future: _hasSubmittedReview(displayBookings[index].id),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        
+                                        final hasReviewed = snapshot.data ?? false;
+                                        
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: ElevatedButton(
+                                            onPressed: hasReviewed
+                                                ? null
+                                                : () => _submitReview(
+                                                    displayBookings[index],
+                                                    booking,
+                                                  ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: hasReviewed
+                                                  ? Colors.grey
+                                                  : Theme.of(context).colorScheme.primary,
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 12, vertical: 8),
+                                              minimumSize: const Size(0, 0),
+                                            ),
+                                            child: Text(
+                                              hasReviewed ? 'Reviewed' : 'Leave Review',
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                ],
                               ),
                               trailing: Chip(
                                 label: Text(
@@ -182,5 +224,63 @@ class _CustomerBookingsScreenState extends State<CustomerBookingsScreen> {
       ),
       child: Text(label),
     );
+  }
+
+  Future<bool> _hasSubmittedReview(String bookingId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    try {
+      // Get the booking to get service and vendor info
+      final bookingDoc = await FirebaseFirestore.instance
+          .collection('bookings')
+          .doc(bookingId)
+          .get();
+
+      if (!bookingDoc.exists) return false;
+
+      final bookingData = bookingDoc.data() as Map<String, dynamic>;
+      final vendorId = bookingData['vendorId'];
+      final serviceId = bookingData['serviceId'];
+
+      // Check if review exists
+      final reviewSnapshot = await FirebaseFirestore.instance
+          .collection('reviews')
+          .where('customerId', isEqualTo: user.uid)
+          .where('vendorId', isEqualTo: vendorId)
+          .where('serviceId', isEqualTo: serviceId)
+          .limit(1)
+          .get();
+
+      return reviewSnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking review status: $e');
+      return false;
+    }
+  }
+
+  Future<void> _submitReview(
+      QueryDocumentSnapshot<Map<String, dynamic>> bookingDoc, Booking booking) async {
+    final bookingData = bookingDoc.data() as Map<String, dynamic>;
+    final vendorId = bookingData['vendorId'];
+    final serviceId = bookingData['serviceId'];
+
+    if (vendorId == null || serviceId == null) return;
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SubmitReviewScreen(
+          vendorId: vendorId,
+          serviceId: serviceId,
+          serviceName: booking.serviceName,
+        ),
+      ),
+    );
+
+    // Refresh the UI after review submission
+    if (result == true) {
+      setState(() {});
+    }
   }
 }
