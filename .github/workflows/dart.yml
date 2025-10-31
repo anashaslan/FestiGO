@@ -8,11 +8,6 @@ jobs:
     name: 🎉 iOS Build
     runs-on: macos-latest
     
-    # Set default working directory for all steps in this job
-    defaults:
-      run:
-        working-directory: event_service_app
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,27 +18,38 @@ jobs:
           channel: 'stable'
           architecture: x64
       
+      - name: Verify directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in current directory:"
+          ls -la
+          echo "Files in event_service_app:"
+          ls -la event_service_app/
+      
       - name: Get dependencies
         run: flutter pub get
+        working-directory: ./event_service_app
 
       - name: Update CocoaPods repo
         run: pod repo update
-        working-directory: event_service_app/ios
+        working-directory: ./event_service_app/ios
 
       - name: Build iOS without code signing
         run: flutter build ios --release --no-codesign
+        working-directory: ./event_service_app
 
       - name: Create Payload directory
         run: mkdir Payload
-        working-directory: event_service_app/build/ios/iphoneos
+        working-directory: ./event_service_app/build/ios/iphoneos
 
       - name: Move Runner.app to Payload
         run: mv Runner.app/ Payload
-        working-directory: event_service_app/build/ios/iphoneos
+        working-directory: ./event_service_app/build/ios/iphoneos
 
       - name: Zip output
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
-        working-directory: event_service_app/build/ios/iphoneos
+        working-directory: ./event_service_app/build/ios/iphoneos
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
