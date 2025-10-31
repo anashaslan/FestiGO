@@ -1,33 +1,68 @@
-name: iOS-ipa-build-debug
+name: iOS-ipa-build
 
 on:
   workflow_dispatch:
 
 jobs:
-  debug:
+  build-ios:
+    name: 🎉 iOS Build
     runs-on: macos-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
       
-      - name: Check repository structure
+      - name: Create GoogleService-Info.plist from secret
         run: |
-          echo "=== Repository Root ==="
-          pwd
-          ls -la
-          echo ""
-          echo "=== Looking for event_service_app ==="
-          if [ -d "event_service_app" ]; then
-            echo "✅ event_service_app directory found"
-            ls -la event_service_app/
-            echo ""
-            echo "=== Checking for pubspec.yaml ==="
-            if [ -f "event_service_app/pubspec.yaml" ]; then
-              echo "✅ pubspec.yaml found"
-              cat event_service_app/pubspec.yaml
-            else
-              echo "❌ pubspec.yaml NOT found"
-            fi
-          else
-            echo "❌ event_service_app directory NOT found"
-          fi
+          echo "${{ secrets.GOOGLESERVICE_INFO_PLIST_BASE64 }}" | base64 --decode > GoogleService-Info.plist
+          echo "✅ GoogleService-Info.plist created successfully"
+          ls -la GoogleService-Info.plist
+        working-directory: ./event_service_app/ios/Runner
+
+      - name: Create google-services.json from secret
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > google-services.json
+        working-directory: ./event_service_app/android/app
+      
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: ./event_service_app
+
+      - name: Update CocoaPods repo
+        run: pod repo update
+        working-directory: ./event_service_app/ios
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+        working-directory: ./event_service_app/ios
+
+      - name: Build iOS without code signing
+        run: flutter build ios --release --no-codesign
+        working-directory: ./event_service_app
+
+      - name: Create Payload directory
+        run: mkdir -p Payload
+        working-directory: ./event_service_app/build/ios/iphoneos
+
+      - name: Move Runner.app to Payload
+        run: mv Runner.app/ Payload/
+        working-directory: ./event_service_app/build/ios/iphoneos
+
+      - name: Zip output
+        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        working-directory: ./event_service_app/build/ios/iphoneos
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: event_service_app/build/ios/iphoneos/FlutterIpaExport.ipa
+          tag: v1.0
+          overwrite: true
+          body: "iOS Release Build - FestiGO v1.0"
