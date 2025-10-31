@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import '../services/image_upload_service.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -15,6 +17,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   bool _pushNotifications = false;
   String _language = 'English';
   String _timezone = 'Asia/Kuala_Lumpur';
+  String? _profileImageUrl;
   bool _autoBackupEnabled = false;
   String _backupFrequency = 'daily';
 
@@ -29,21 +32,28 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     if (user == null) return;
 
     try {
-      final settingsDoc = await FirebaseFirestore.instance
-          .collection('admin_settings')
+      // Load user data (including admin settings and profile image)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
           .doc(user.uid)
           .get();
 
-      if (settingsDoc.exists) {
-        final data = settingsDoc.data() as Map<String, dynamic>;
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        
+        // Load admin settings
+        final adminSettings = userData['adminSettings'] as Map<String, dynamic>? ?? {};
         setState(() {
-          _notificationsEnabled = data['notificationsEnabled'] ?? true;
-          _emailNotifications = data['emailNotifications'] ?? true;
-          _pushNotifications = data['pushNotifications'] ?? false;
-          _language = data['language'] ?? 'English';
-          _timezone = data['timezone'] ?? 'Asia/Kuala_Lumpur';
-          _autoBackupEnabled = data['autoBackupEnabled'] ?? false;
-          _backupFrequency = data['backupFrequency'] ?? 'daily';
+          _notificationsEnabled = adminSettings['notificationsEnabled'] ?? true;
+          _emailNotifications = adminSettings['emailNotifications'] ?? true;
+          _pushNotifications = adminSettings['pushNotifications'] ?? false;
+          _language = adminSettings['language'] ?? 'English';
+          _timezone = adminSettings['timezone'] ?? 'Asia/Kuala_Lumpur';
+          _autoBackupEnabled = adminSettings['autoBackupEnabled'] ?? false;
+          _backupFrequency = adminSettings['backupFrequency'] ?? 'daily';
+          
+          // Load profile image
+          _profileImageUrl = userData['profileImageUrl'];
         });
       }
     } catch (e) {
@@ -57,18 +67,20 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
     try {
       await FirebaseFirestore.instance
-          .collection('admin_settings')
+          .collection('users')
           .doc(user.uid)
-          .set({
-        'notificationsEnabled': _notificationsEnabled,
-        'emailNotifications': _emailNotifications,
-        'pushNotifications': _pushNotifications,
-        'language': _language,
-        'timezone': _timezone,
-        'autoBackupEnabled': _autoBackupEnabled,
-        'backupFrequency': _backupFrequency,
-        'lastUpdated': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+          .update({
+        'adminSettings': {
+          'notificationsEnabled': _notificationsEnabled,
+          'emailNotifications': _emailNotifications,
+          'pushNotifications': _pushNotifications,
+          'language': _language,
+          'timezone': _timezone,
+          'autoBackupEnabled': _autoBackupEnabled,
+          'backupFrequency': _backupFrequency,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -370,17 +382,49 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  user.displayName?.substring(0, 1).toUpperCase() ?? 'A',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundImage: _profileImageUrl != null 
+                      ? NetworkImage(_profileImageUrl!) 
+                      : null,
+                    child: _profileImageUrl == null 
+                      ? Text(
+                          user.displayName?.substring(0, 1).toUpperCase() ?? 'A',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                   ),
-                ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        onPressed: _pickAndUploadImage,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               TextField(
@@ -803,6 +847,79 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         ],
       ),
     );
+  }
+  void _pickAndUploadImage() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final image = await ImageUploadService().pickImage(ImageSource.gallery);
+                  if (image != null) {
+                    _uploadImage(image);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera),
+                title: const Text('Camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final image = await ImageUploadService().pickImage(ImageSource.camera);
+                  if (image != null) {
+                    _uploadImage(image);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _uploadImage(XFile imageFile) async {
+    final downloadURL = await ImageUploadService().uploadProfileImage(imageFile);
+    if (downloadURL != null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'profileImageUrl': downloadURL});
+          
+          setState(() {
+            _profileImageUrl = downloadURL;
+          });
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Profile picture updated successfully')),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error updating profile picture: $e')),
+            );
+          }
+        }
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload image')),
+        );
+      }
+    }
   }
 }
 

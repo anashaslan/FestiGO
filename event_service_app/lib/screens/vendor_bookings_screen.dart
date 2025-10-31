@@ -140,7 +140,7 @@ class _VendorBookingsScreenState extends State<VendorBookingsScreen> {
                             child: ListTile(
                               title: Text(booking['serviceName'] ?? 'Unknown Service'),
                               subtitle: Text(
-                                'From: ${booking['customerEmail'] ?? 'N/A'}\nBooked on: $formattedDate',
+                                'From: ${booking['customerName'] ?? booking['customerEmail'] ?? booking['customerId'] ?? 'Customer'}\nBooked on: $formattedDate',
                               ),
                               isThreeLine: true,
                               trailing: Chip(

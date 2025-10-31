@@ -380,7 +380,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-SizedBox(
+                              SizedBox(
                                height: 150,
                                child: BookingsByCategoryChart(
                                  startDate: DateTime.now().subtract(const Duration(days: 30)),

@@ -28,6 +28,9 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
     Colors.purple,
     Colors.teal,
   ];
+  
+  // Store ongoing operations to prevent setState after dispose
+  final Map<String, int> _categoryMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -47,36 +50,91 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
 
         final bookings = snapshot.data?.docs ?? [];
         
-        // Group bookings by service category
-        final categoryMap = <String, int>{};
+        // Clear previous data
+        _categoryMap.clear();
         
+        // Group bookings by service category
+        // Collect all unique service IDs first
+        final serviceIds = <String>{};
         for (var booking in bookings) {
           final data = booking.data() as Map<String, dynamic>;
           final serviceId = data['serviceId'] as String?;
-          
           if (serviceId != null) {
-            // Get service category
-            FirebaseFirestore.instance.collection('services').doc(serviceId).get().then((serviceDoc) {
-              if (serviceDoc.exists) {
-                final serviceData = serviceDoc.data() as Map<String, dynamic>;
-                final category = serviceData['category'] as String? ?? 'Unknown';
-                
-                setState(() {
-                  categoryMap[category] = (categoryMap[category] ?? 0) + 1;
-                });
-              }
-            });
+            serviceIds.add(serviceId);
           }
         }
         
-        // For initial build, we'll show a loading state or default data
-        if (categoryMap.isEmpty) {
+        // If no service IDs, show empty state
+        if (serviceIds.isEmpty) {
           return _buildPieChart({}, 'No data available');
         }
         
-        return _buildPieChart(categoryMap, '');
+        // Fetch all services in batch to avoid multiple async calls
+        _fetchServiceCategories(serviceIds, bookings);
+        
+        // Show current state (will update when data loads)
+        if (_categoryMap.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        return _buildPieChart(_categoryMap, '');
       },
     );
+  }
+  
+  Future<void> _fetchServiceCategories(Set<String> serviceIds, List<QueryDocumentSnapshot> bookings) async {
+    try {
+      // Batch fetch all services to avoid multiple async calls
+      final List<Future<DocumentSnapshot>> futures = [];
+      for (final serviceId in serviceIds) {
+        futures.add(FirebaseFirestore.instance.collection('services').doc(serviceId).get());
+      }
+      
+      final List<DocumentSnapshot> serviceDocs = await Future.wait(futures);
+      
+      // Process results and update category map
+      final newCategoryMap = <String, int>{};
+      
+      for (var booking in bookings) {
+        final data = booking.data() as Map<String, dynamic>;
+        final serviceId = data['serviceId'] as String?;
+        
+        if (serviceId != null) {
+          // Find the corresponding service document
+          try {
+            final serviceDoc = serviceDocs.firstWhere(
+              (doc) => doc.id == serviceId,
+            );
+            
+            // Process if service document exists
+            if (serviceDoc.exists) {
+              final serviceData = serviceDoc.data() as Map<String, dynamic>;
+              final category = serviceData['category'] as String? ?? 'Unknown';
+              newCategoryMap[category] = (newCategoryMap[category] ?? 0) + 1;
+            }
+          } catch (e) {
+            // Service ID not found in fetched documents, skip it
+            continue;
+          }
+        }
+      }
+      
+      // Only update state if widget is still mounted
+      if (mounted) {
+        setState(() {
+          _categoryMap.clear();
+          _categoryMap.addAll(newCategoryMap);
+        });
+      }
+    } catch (e) {
+      print('Error fetching service categories: $e');
+      // Only update state if widget is still mounted
+      if (mounted) {
+        setState(() {
+          _categoryMap.clear();
+        });
+      }
+    }
   }
 
   Widget _buildPieChart(Map<String, int> data, String emptyMessage) {
@@ -153,7 +211,10 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
                   Container(
                     width: 12,
                     height: 12,
-                    color: _colors[index % _colors.length],
+                    decoration: BoxDecoration(
+                      color: _colors[index % _colors.length],
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -194,7 +255,6 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
       stream: FirebaseFirestore.instance.collection('bookings')
           .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(widget.startDate))
           .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(widget.endDate))
-          .where('status', isEqualTo: 'confirmed')
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -413,7 +473,7 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
 
     final List<FlSpot> spots = [];
     final List<String> months = data.keys.toList()..sort();
-    final maxValue = data.values.fold(0, (maxVal, value) => value > maxVal ? value : maxVal);
+    int maxValue = data.values.fold(0, (maxVal, value) => value > maxVal ? value : maxVal);
     
     // Calculate cumulative values
     int cumulative = 0;

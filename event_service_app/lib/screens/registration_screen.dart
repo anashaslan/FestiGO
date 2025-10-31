@@ -35,6 +35,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         'name': _nameController.text.trim(),
         'role': _selectedRole,
         'createdAt': FieldValue.serverTimestamp(),
+        'profileImageUrl': null,
       });
 
       if (mounted) {
