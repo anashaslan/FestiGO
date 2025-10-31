@@ -261,7 +261,7 @@ class _CustomerBookingsScreenState extends State<CustomerBookingsScreen> {
 
   Future<void> _submitReview(
       QueryDocumentSnapshot<Map<String, dynamic>> bookingDoc, Booking booking) async {
-    final bookingData = bookingDoc.data() as Map<String, dynamic>;
+    final bookingData = bookingDoc.data();
     final vendorId = bookingData['vendorId'];
     final serviceId = bookingData['serviceId'];
 

@@ -56,7 +56,10 @@ dependencies:
   
   # Calendar/booking management
   table_calendar: ^3.0.9
-  syncfusion_flutter_calendar: ^23.2.7  
+  syncfusion_flutter_calendar: ^23.2.7
+  
+  # Charting library
+  fl_chart: ^0.68.0  
 
 dev_dependencies:
   flutter_test:
