@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
+// ============================================================================
+// BookingsByCategoryChart - FIXED VERSION with FutureBuilder
+// ============================================================================
 class BookingsByCategoryChart extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
@@ -16,7 +19,8 @@ class BookingsByCategoryChart extends StatefulWidget {
   });
 
   @override
-  State<BookingsByCategoryChart> createState() => _BookingsByCategoryChartState();
+  State<BookingsByCategoryChart> createState() =>
+      _BookingsByCategoryChartState();
 }
 
 class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
@@ -28,112 +32,94 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
     Colors.purple,
     Colors.teal,
   ];
-  
-  // Store ongoing operations to prevent setState after dispose
-  final Map<String, int> _categoryMap = {};
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('bookings')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(widget.startDate))
-          .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(widget.endDate))
-          .snapshots(),
+    return FutureBuilder<Map<String, int>>(
+      future: _fetchCategoryData(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final bookings = snapshot.data?.docs ?? [];
-        
-        // Clear previous data
-        _categoryMap.clear();
-        
-        // Group bookings by service category
-        // Collect all unique service IDs first
-        final serviceIds = <String>{};
-        for (var booking in bookings) {
-          final data = booking.data() as Map<String, dynamic>;
-          final serviceId = data['serviceId'] as String?;
-          if (serviceId != null) {
-            serviceIds.add(serviceId);
-          }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
-        
-        // If no service IDs, show empty state
-        if (serviceIds.isEmpty) {
+
+        final categoryMap = snapshot.data ?? {};
+
+        if (categoryMap.isEmpty) {
           return _buildPieChart({}, 'No data available');
         }
-        
-        // Fetch all services in batch to avoid multiple async calls
-        _fetchServiceCategories(serviceIds, bookings);
-        
-        // Show current state (will update when data loads)
-        if (_categoryMap.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        return _buildPieChart(_categoryMap, '');
+
+        return _buildPieChart(categoryMap, '');
       },
     );
   }
-  
-  Future<void> _fetchServiceCategories(Set<String> serviceIds, List<QueryDocumentSnapshot> bookings) async {
+
+  /// Fetches all bookings and processes them into category counts
+  Future<Map<String, int>> _fetchCategoryData() async {
     try {
-      // Batch fetch all services to avoid multiple async calls
-      final List<Future<DocumentSnapshot>> futures = [];
-      for (final serviceId in serviceIds) {
-        futures.add(FirebaseFirestore.instance.collection('services').doc(serviceId).get());
+      // Step 1: Fetch all bookings in date range
+      final bookingsSnapshot = await FirebaseFirestore.instance
+          .collection('bookings')
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(widget.startDate))
+          .where('createdAt',
+              isLessThanOrEqualTo: Timestamp.fromDate(widget.endDate))
+          .get();
+
+      if (bookingsSnapshot.docs.isEmpty) {
+        return {};
       }
-      
-      final List<DocumentSnapshot> serviceDocs = await Future.wait(futures);
-      
-      // Process results and update category map
-      final newCategoryMap = <String, int>{};
-      
-      for (var booking in bookings) {
-        final data = booking.data() as Map<String, dynamic>;
+
+      // Step 2: Collect unique service IDs
+      final serviceIds = <String>{};
+      for (var booking in bookingsSnapshot.docs) {
+        final data = booking.data();
         final serviceId = data['serviceId'] as String?;
-        
         if (serviceId != null) {
-          // Find the corresponding service document
-          try {
-            final serviceDoc = serviceDocs.firstWhere(
-              (doc) => doc.id == serviceId,
-            );
-            
-            // Process if service document exists
-            if (serviceDoc.exists) {
-              final serviceData = serviceDoc.data() as Map<String, dynamic>;
-              final category = serviceData['category'] as String? ?? 'Unknown';
-              newCategoryMap[category] = (newCategoryMap[category] ?? 0) + 1;
-            }
-          } catch (e) {
-            // Service ID not found in fetched documents, skip it
-            continue;
-          }
+          serviceIds.add(serviceId);
         }
       }
-      
-      // Only update state if widget is still mounted
-      if (mounted) {
-        setState(() {
-          _categoryMap.clear();
-          _categoryMap.addAll(newCategoryMap);
-        });
+
+      if (serviceIds.isEmpty) {
+        return {};
       }
+
+      // Step 3: Batch fetch all services using Future.wait for efficiency
+      final serviceFutures = serviceIds.map((serviceId) =>
+          FirebaseFirestore.instance
+              .collection('services')
+              .doc(serviceId)
+              .get());
+      final serviceDocs = await Future.wait(serviceFutures);
+
+      // Step 4: Create service ID to category mapping
+      final Map<String, String> serviceToCategory = {};
+      for (var serviceDoc in serviceDocs) {
+        if (serviceDoc.exists) {
+          final serviceData = serviceDoc.data() as Map<String, dynamic>;
+          final category = serviceData['category'] as String? ?? 'Unknown';
+          serviceToCategory[serviceDoc.id] = category;
+        }
+      }
+
+      // Step 5: Count bookings by category
+      final Map<String, int> categoryMap = {};
+      for (var booking in bookingsSnapshot.docs) {
+        final data = booking.data();
+        final serviceId = data['serviceId'] as String?;
+        if (serviceId != null && serviceToCategory.containsKey(serviceId)) {
+          final category = serviceToCategory[serviceId]!;
+          categoryMap[category] = (categoryMap[category] ?? 0) + 1;
+        }
+      }
+
+      return categoryMap;
     } catch (e) {
-      print('Error fetching service categories: $e');
-      // Only update state if widget is still mounted
-      if (mounted) {
-        setState(() {
-          _categoryMap.clear();
-        });
-      }
+      print('Error fetching category  $e');
+      return {};
     }
   }
 
@@ -148,12 +134,11 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
     }
 
     final List<PieChartSectionData> sections = [];
-    final total = data.values.fold(0, (sumValue, item) => sumValue + item);
-    
+    final total = data.values.fold(0, (sum, item) => sum + item);
     int index = 0;
+
     data.forEach((category, count) {
       final percentage = total > 0 ? (count / total) * 100 : 0;
-      
       sections.add(
         PieChartSectionData(
           color: _colors[index % _colors.length],
@@ -167,7 +152,6 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
           ),
         ),
       );
-      
       index++;
     });
 
@@ -195,43 +179,43 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
           ),
         ),
         const SizedBox(height: 16),
-        // Legend
-        SizedBox(
-          height: 60,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: data.length,
-            itemBuilder: (context, index) {
-              final category = data.keys.elementAt(index);
-              final count = data.values.elementAt(index);
-              
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _colors[index % _colors.length],
-                      shape: BoxShape.circle,
-                    ),
+        // Legend - Changed to vertical layout with wrapping
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: data.entries.map((entry) {
+            final index = data.keys.toList().indexOf(entry.key);
+            final category = entry.key;
+            final count = entry.value;
+
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: _colors[index % _colors.length],
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$category ($count)',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-              );
-            },
-          ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '$category ($count)',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ],
     );
   }
 }
 
+// ============================================================================
+// MonthlyRevenueChart - Works correctly, keeping as-is with StreamBuilder
+// ============================================================================
 class MonthlyRevenueChart extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
@@ -252,9 +236,12 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('bookings')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(widget.startDate))
-          .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(widget.endDate))
+      stream: FirebaseFirestore.instance
+          .collection('bookings')
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(widget.startDate))
+          .where('createdAt',
+              isLessThanOrEqualTo: Timestamp.fromDate(widget.endDate))
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -266,21 +253,20 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
         }
 
         final bookings = snapshot.data?.docs ?? [];
-        
+
         // Group by month and calculate revenue
         final monthlyRevenue = <String, double>{};
-        
         for (var booking in bookings) {
           final data = booking.data() as Map<String, dynamic>;
           final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
           final price = (data['price'] as num?)?.toDouble() ?? 0.0;
-          
+
           if (createdAt != null) {
             final monthKey = DateFormat('yyyy-MM').format(createdAt);
             monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] ?? 0) + price;
           }
         }
-        
+
         return _buildBarChart(monthlyRevenue);
       },
     );
@@ -298,12 +284,12 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
 
     final List<BarChartGroupData> barGroups = [];
     final List<String> months = data.keys.toList()..sort();
-    final maxValue = data.values.fold(0.0, (maxValue, value) => value > maxValue ? value : maxValue);
-    
+    final maxValue = data.values
+        .fold(0.0, (maxValue, value) => value > maxValue ? value : maxValue);
+
     for (int i = 0; i < months.length; i++) {
       final month = months[i];
       final revenue = data[month] ?? 0.0;
-      
       barGroups.add(
         BarChartGroupData(
           x: i,
@@ -369,8 +355,10 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
                     reservedSize: 40,
                   ),
                 ),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(show: true),
@@ -387,10 +375,9 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
             itemCount: months.length,
             itemBuilder: (context, index) {
               final monthKey = months[index];
-              final monthName = DateFormat('MMM yyyy').format(
-                DateTime(int.parse(monthKey.split('-')[0]), int.parse(monthKey.split('-')[1]))
-              );
-              
+              final monthName = DateFormat('MMM yyyy').format(DateTime(
+                  int.parse(monthKey.split('-')[0]),
+                  int.parse(monthKey.split('-')[1])));
               return SizedBox(
                 width: 60,
                 child: Text(
@@ -407,6 +394,9 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
   }
 }
 
+// ============================================================================
+// UserGrowthChart - Works correctly, keeping as-is with StreamBuilder
+// ============================================================================
 class UserGrowthChart extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
@@ -427,9 +417,9 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('users')
-          .where('role', whereIn: ['customer', 'vendor'])
-          .snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('role', whereIn: ['customer', 'vendor']).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -440,22 +430,20 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
         }
 
         final users = snapshot.data?.docs ?? [];
-        
+
         // Group by month and calculate cumulative growth
         final monthlyGrowth = <String, int>{};
-        
         for (var user in users) {
           final data = user.data() as Map<String, dynamic>;
           final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-          
-          if (createdAt != null && 
-              createdAt.isAfter(widget.startDate) && 
+          if (createdAt != null &&
+              createdAt.isAfter(widget.startDate) &&
               createdAt.isBefore(widget.endDate)) {
             final monthKey = DateFormat('yyyy-MM').format(createdAt);
             monthlyGrowth[monthKey] = (monthlyGrowth[monthKey] ?? 0) + 1;
           }
         }
-        
+
         return _buildLineChart(monthlyGrowth);
       },
     );
@@ -473,8 +461,7 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
 
     final List<FlSpot> spots = [];
     final List<String> months = data.keys.toList()..sort();
-    int maxValue = data.values.fold(0, (maxVal, value) => value > maxVal ? value : maxVal);
-    
+
     // Calculate cumulative values
     int cumulative = 0;
     for (int i = 0; i < months.length; i++) {
@@ -506,7 +493,8 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
                   isCurved: true,
                   color: Colors.green,
                   barWidth: 3,
-                  belowBarData: BarAreaData(show: true, color: Colors.green.withValues(alpha: 0.3)),
+                  belowBarData: BarAreaData(
+                      show: true, color: Colors.green.withValues(alpha: 0.3)),
                   dotData: FlDotData(show: true),
                 ),
               ],
@@ -539,12 +527,15 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
                     reservedSize: 30,
                   ),
                 ),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               borderData: FlBorderData(show: true),
               gridData: FlGridData(show: true),
-              maxY: (cumulative * 1.2).toDouble(), // Add some padding at the top
+              maxY:
+                  (cumulative * 1.2).toDouble(), // Add some padding at the top
             ),
           ),
         ),
@@ -557,10 +548,9 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
             itemCount: months.length,
             itemBuilder: (context, index) {
               final monthKey = months[index];
-              final monthName = DateFormat('MMM yyyy').format(
-                DateTime(int.parse(monthKey.split('-')[0]), int.parse(monthKey.split('-')[1]))
-              );
-              
+              final monthName = DateFormat('MMM yyyy').format(DateTime(
+                  int.parse(monthKey.split('-')[0]),
+                  int.parse(monthKey.split('-')[1])));
               return SizedBox(
                 width: 60,
                 child: Text(

@@ -76,7 +76,7 @@ class _VendorBookingDetailScreenState extends State<VendorBookingDetailScreen> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 16),
-                Text('From: ${booking['customerEmail'] ?? 'N/A'}'),
+                Text('From: ${booking['customerName'] ?? booking['customerEmail'] ?? booking['customerId'] ?? 'Customer'}'),
                 const SizedBox(height: 8),
                 Text('Booked on: $formattedDate'),
                 const SizedBox(height: 8),

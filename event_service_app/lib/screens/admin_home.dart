@@ -32,8 +32,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     return number.toString();
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +59,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         Expanded(
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('FestiGO'), // Changed title as requested
+              title: const Text('FestiGO'),
               backgroundColor: Colors.white,
               elevation: 1,
               actions: [
@@ -91,7 +89,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                             children: [
                               Expanded(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'vendor').snapshots(),
+                                  stream: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .where('role', isEqualTo: 'vendor')
+                                      .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return GestureDetector(
@@ -99,21 +100,30 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => const AdminUsersScreen(),
+                                              builder: (context) =>
+                                                  const AdminUsersScreen(),
                                             ),
                                           );
                                         },
-                                        child: _buildSummaryCard('Total Vendors', _formatNumber(snapshot.data!.docs.length), Icons.store),
+                                        child: _buildSummaryCard(
+                                            'Total Vendors',
+                                            _formatNumber(
+                                                snapshot.data!.docs.length),
+                                            Icons.store),
                                       );
                                     }
-                                    return _buildSummaryCard('Total Vendors', '0', Icons.store);
+                                    return _buildSummaryCard(
+                                        'Total Vendors', '0', Icons.store);
                                   },
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'customer').snapshots(),
+                                  stream: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .where('role', isEqualTo: 'customer')
+                                      .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return GestureDetector(
@@ -121,21 +131,29 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => const AdminUsersScreen(),
+                                              builder: (context) =>
+                                                  const AdminUsersScreen(),
                                             ),
                                           );
                                         },
-                                        child: _buildSummaryCard('Customers', _formatNumber(snapshot.data!.docs.length), Icons.people),
+                                        child: _buildSummaryCard(
+                                            'Customers',
+                                            _formatNumber(
+                                                snapshot.data!.docs.length),
+                                            Icons.people),
                                       );
                                     }
-                                    return _buildSummaryCard('Customers', '0', Icons.people);
+                                    return _buildSummaryCard(
+                                        'Customers', '0', Icons.people);
                                   },
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance.collection('bookings').snapshots(),
+                                  stream: FirebaseFirestore.instance
+                                      .collection('bookings')
+                                      .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return GestureDetector(
@@ -143,21 +161,29 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => const AdminBookingsScreen(),
+                                              builder: (context) =>
+                                                  const AdminBookingsScreen(),
                                             ),
                                           );
                                         },
-                                        child: _buildSummaryCard('Bookings', _formatNumber(snapshot.data!.docs.length), Icons.event_note),
+                                        child: _buildSummaryCard(
+                                            'Bookings',
+                                            _formatNumber(
+                                                snapshot.data!.docs.length),
+                                            Icons.event_note),
                                       );
                                     }
-                                    return _buildSummaryCard('Bookings', '0', Icons.event_note);
+                                    return _buildSummaryCard(
+                                        'Bookings', '0', Icons.event_note);
                                   },
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance.collection('services').snapshots(),
+                                  stream: FirebaseFirestore.instance
+                                      .collection('services')
+                                      .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return GestureDetector(
@@ -165,14 +191,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => const AdminServicesScreen(),
+                                              builder: (context) =>
+                                                  const AdminServicesScreen(),
                                             ),
                                           );
                                         },
-                                        child: _buildSummaryCard('Services', _formatNumber(snapshot.data!.docs.length), Icons.miscellaneous_services),
+                                        child: _buildSummaryCard(
+                                            'Services',
+                                            _formatNumber(
+                                                snapshot.data!.docs.length),
+                                            Icons.miscellaneous_services),
                                       );
                                     }
-                                    return _buildSummaryCard('Services', '0', Icons.miscellaneous_services);
+                                    return _buildSummaryCard('Services', '0',
+                                        Icons.miscellaneous_services);
                                   },
                                 ),
                               ),
@@ -189,11 +221,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                 flex: 2,
                                 child: Card(
                                   elevation: 2,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'Bookings by Category',
@@ -203,12 +237,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 16),
-                                        SizedBox(
-                                          height: 200,
+                                        Expanded(
                                           child: BookingsByCategoryChart(
-                                            startDate: DateTime.now().subtract(const Duration(days: 30)),
+                                            startDate: DateTime.now().subtract(
+                                                const Duration(days: 30)),
                                             endDate: DateTime.now(),
-                                            title: 'Recent Bookings by Category',
+                                            title: null,
                                           ),
                                         ),
                                       ],
@@ -221,7 +255,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               SizedBox(
                                 width: 300,
                                 child: ElevatedButton.icon(
-                                  onPressed: () => _showRecentActivityPopup(context),
+                                  onPressed: () =>
+                                      _showRecentActivityPopup(context),
                                   icon: const Icon(Icons.history),
                                   label: const Text('View Recent Activity'),
                                   style: ElevatedButton.styleFrom(
@@ -247,7 +282,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // Builds the Vertical (Portrait) Layout based on Page 1 of the prototype
+  // Builds the Vertical (Portrait) Layout - FIXED VERSION
   Widget _buildPortraitLayout() {
     return Scaffold(
       appBar: AppBar(
@@ -259,8 +294,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
         ],
       ),
-      drawer: Drawer(child: _buildSidebar()), // Use a Drawer for the sidebar
-      body: Padding(
+      drawer: Drawer(child: _buildSidebar()),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,134 +305,152 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.8, // Make cards taller
-                      children: [
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'vendor').snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const AdminUsersScreen(),
-                                    ),
-                                  );
-                                },
-                                child: _buildSummaryCard('Total Vendors', _formatNumber(snapshot.data!.docs.length), Icons.store),
-                              );
-                            }
-                            return _buildSummaryCard('Total Vendors', '0', Icons.store);
-                          },
-                        ),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'customer').snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const AdminUsersScreen(),
-                                    ),
-                                  );
-                                },
-                                child: _buildSummaryCard('Customers', _formatNumber(snapshot.data!.docs.length), Icons.people),
-                              );
-                            }
-                            return _buildSummaryCard('Customers', '0', Icons.people);
-                          },
-                        ),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance.collection('bookings').snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const AdminBookingsScreen(),
-                                    ),
-                                  );
-                                },
-                                child: _buildSummaryCard('Bookings', _formatNumber(snapshot.data!.docs.length), Icons.event_note),
-                              );
-                            }
-                            return _buildSummaryCard('Bookings', '0', Icons.event_note);
-                          },
-                        ),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance.collection('services').snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const AdminServicesScreen(),
-                                    ),
-                                  );
-                                },
-                                child: _buildSummaryCard('Services', _formatNumber(snapshot.data!.docs.length), Icons.miscellaneous_services),
-                              );
-                            }
-                            return _buildSummaryCard('Services', '0', Icons.miscellaneous_services);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Chart
-                  Expanded(
-                    flex: 1,
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Recent Bookings by Category',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+
+            // Summary Cards Grid
+            GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.8,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .where('role', isEqualTo: 'vendor')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminUsersScreen(),
                             ),
-                            const SizedBox(height: 8),
-                              SizedBox(
-                               height: 150,
-                               child: BookingsByCategoryChart(
-                                 startDate: DateTime.now().subtract(const Duration(days: 30)),
-                                 endDate: DateTime.now(),
-                                 title: 'Recent Bookings by Category',
-                               ),
-                             ),
-                          ],
-                        ),
+                          );
+                        },
+                        child: _buildSummaryCard(
+                            'Total Vendors',
+                            _formatNumber(snapshot.data!.docs.length),
+                            Icons.store),
+                      );
+                    }
+                    return _buildSummaryCard('Total Vendors', '0', Icons.store);
+                  },
+                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .where('role', isEqualTo: 'customer')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminUsersScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard('Customers',
+                            _formatNumber(snapshot.data!.docs.length), Icons.people),
+                      );
+                    }
+                    return _buildSummaryCard('Customers', '0', Icons.people);
+                  },
+                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('bookings')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminBookingsScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard('Bookings',
+                            _formatNumber(snapshot.data!.docs.length), Icons.event_note),
+                      );
+                    }
+                    return _buildSummaryCard('Bookings', '0', Icons.event_note);
+                  },
+                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('services')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminServicesScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard(
+                            'Services',
+                            _formatNumber(snapshot.data!.docs.length),
+                            Icons.miscellaneous_services),
+                      );
+                    }
+                    return _buildSummaryCard(
+                        'Services', '0', Icons.miscellaneous_services);
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Chart Card - Now with proper height and inside main container
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Recent Bookings by Category',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    // Increased height from 150 to 380 for proper legend display
+                    SizedBox(
+                      height: 380,
+                      child: BookingsByCategoryChart(
+                        startDate:
+                            DateTime.now().subtract(const Duration(days: 30)),
+                        endDate: DateTime.now(),
+                        title: null, // Remove duplicate title
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+
             const SizedBox(height: 16),
-            // Recent Activity Button
+
+            // Recent Activity Button - Now inside main container
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -447,9 +500,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   // Reusable widget for individual sidebar items
-  Widget _buildSidebarItem(IconData icon, String title, {bool isSelected = false}) {
+  Widget _buildSidebarItem(IconData icon, String title,
+      {bool isSelected = false}) {
     return ListTile(
-      leading: Icon(icon, color: isSelected ? Colors.deepPurple : Colors.grey[700]),
+      leading: Icon(icon,
+          color: isSelected ? Colors.deepPurple : Colors.grey[700]),
       title: Text(
         title,
         style: TextStyle(
@@ -469,16 +524,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   void _navigateToScreen(String title) {
     switch (title) {
       case 'Vendors':
-        // Navigate to users screen with vendor filter
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AdminUsersScreen(),
-          ),
-        );
-        break;
       case 'Customers':
-        // Navigate to users screen with customer filter
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -518,7 +564,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
         );
         break;
-      // Other cases can be added as needed
     }
   }
 
@@ -530,11 +575,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return GestureDetector(
-          onTap: () => Navigator.pop(context), // Close when tapping outside
+          onTap: () => Navigator.pop(context),
           child: Container(
-            color: Colors.black.withValues(alpha: 0.4), // Semi-transparent background
+            color: Colors.black.withValues(alpha: 0.4),
             child: GestureDetector(
-              onTap: () {}, // Prevent tap events from reaching the background
+              onTap: () {},
               child: DraggableScrollableSheet(
                 initialChildSize: 0.7,
                 minChildSize: 0.3,
@@ -543,7 +588,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   return Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     child: Column(
                       children: [
@@ -588,17 +634,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (snapshot.hasError) {
-                                return Center(child: Text('Error: ${snapshot.error}'));
+                                return Center(
+                                    child: Text('Error: ${snapshot.error}'));
                               }
 
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
                               }
 
                               final bookings = snapshot.data?.docs ?? [];
-
                               if (bookings.isEmpty) {
-                                return const Center(child: Text('No recent activity'));
+                                return const Center(
+                                    child: Text('No recent activity'));
                               }
 
                               return ListView.builder(
@@ -606,13 +655,19 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                 itemCount: bookings.length,
                                 itemBuilder: (context, index) {
                                   final booking = bookings[index];
-                                  final data = booking.data() as Map<String, dynamic>;
-                                  final serviceName = data['serviceName'] ?? 'Unknown Service';
+                                  final data =
+                                      booking.data() as Map<String, dynamic>;
+                                  final serviceName =
+                                      data['serviceName'] ?? 'Unknown Service';
                                   final status = data['status'] ?? 'pending';
-                                  final customerId = data['customerId'] ?? 'Unknown';
-                                  final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+                                  final customerId =
+                                      data['customerId'] ?? 'Unknown';
+                                  final createdAt =
+                                      (data['createdAt'] as Timestamp?)
+                                          ?.toDate();
                                   final formattedDate = createdAt != null
-                                      ? DateFormat('MMM dd, yyyy HH:mm').format(createdAt)
+                                      ? DateFormat('MMM dd, yyyy HH:mm')
+                                          .format(createdAt)
                                       : 'Unknown Date';
 
                                   return Card(
@@ -621,7 +676,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                     child: ListTile(
                                       title: Text(serviceName),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text('Customer: $customerId'),
                                           Text('Booked on: $formattedDate'),
@@ -630,10 +686,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                       trailing: Chip(
                                         label: Text(status.toUpperCase()),
                                         backgroundColor: status == 'confirmed'
-                                            ? Colors.green.withValues(alpha: 0.2)
+                                            ? Colors.green
+                                                .withValues(alpha: 0.2)
                                             : status == 'rejected'
-                                                ? Colors.red.withValues(alpha: 0.2)
-                                                : Colors.orange.withValues(alpha: 0.2),
+                                                ? Colors.red
+                                                    .withValues(alpha: 0.2)
+                                                : Colors.orange
+                                                    .withValues(alpha: 0.2),
                                       ),
                                     ),
                                   );
@@ -670,7 +729,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               children: [
                 Flexible(
                   child: Text(
-                    title, 
+                    title,
                     style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     overflow: TextOverflow.ellipsis,
                   ),

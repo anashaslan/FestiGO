@@ -30,7 +30,6 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
   ];
   String _selectedCategory = 'COMMUNITY AND PUBLIC';
   bool _showOtherCategory = false;
-
   bool _isSubmitting = false;
 
   Future<void> _pickServiceImage() async {
