@@ -142,7 +142,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                     const SizedBox(height: 16),
                     // Use SizedBox with fixed height instead of Expanded
                     SizedBox(
-                      height: 250,
+                      height: 300,
                       child: BookingsByCategoryChart(
                         startDate: _startDate,
                         endDate: _endDate,
@@ -151,7 +151,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 250,
+                      height: 300,
                       child: MonthlyRevenueChart(
                         startDate: _startDate,
                         endDate: _endDate,
@@ -160,7 +160,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 250,
+                      height: 300,
                       child: UserGrowthChart(
                         startDate: _startDate,
                         endDate: _endDate,
@@ -255,7 +255,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   }
 
   Widget _buildRevenueReport() {
-    return Padding(
+    return SingleChildScrollView(  // ← Add this wrapper
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,47 +266,47 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           ),
           const SizedBox(height: 16),
           FutureBuilder<double>(
-              future: _getTotalRevenue(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            future: _getTotalRevenue(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
 
-                final totalRevenue = snapshot.data ?? 0.0;
+              final totalRevenue = snapshot.data ?? 0.0;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Total Revenue: \$${totalRevenue.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Revenue: \$${totalRevenue.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 300,
+                    child: MonthlyRevenueChart(
+                      startDate: _startDate,
+                      endDate: _endDate,
+                      title: 'Monthly Revenue Trend',
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 250,
-                      child: MonthlyRevenueChart(
-                        startDate: _startDate,
-                        endDate: _endDate,
-                        title: 'Monthly Revenue Trend',
-                      ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 300,
+                    child: BookingsByCategoryChart(
+                      startDate: _startDate,
+                      endDate: _endDate,
+                      title: 'Bookings by Category',
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 250,
-                      child: BookingsByCategoryChart(
-                        startDate: _startDate,
-                        endDate: _endDate,
-                        title: 'Bookings by Category',
-                      ),
-                    ),
-                  ],
-                );
-              }),
+                  ),
+                ],
+              );
+            }),
         ],
       ),
     );
@@ -355,7 +355,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 250,
+                      height: 300,
                       child: UserGrowthChart(
                         startDate: _startDate,
                         endDate: _endDate,

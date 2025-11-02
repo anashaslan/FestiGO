@@ -169,7 +169,7 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
               ),
             ),
           ),
-        Expanded(
+        Expanded(  // ← Change from SizedBox(height: 200) to Expanded
           child: PieChart(
             PieChartData(
               sections: sections,
@@ -179,7 +179,7 @@ class _BookingsByCategoryChartState extends State<BookingsByCategoryChart> {
           ),
         ),
         const SizedBox(height: 16),
-        // Legend - Changed to vertical layout with wrapping
+        // Legend (Wrap widget)
         Wrap(
           spacing: 12,
           runSpacing: 8,
@@ -322,7 +322,8 @@ class _MonthlyRevenueChartState extends State<MonthlyRevenueChart> {
               ),
             ),
           ),
-        Expanded(
+        SizedBox(
+          height: 200,
           child: BarChart(
             BarChartData(
               barGroups: barGroups,
@@ -484,7 +485,8 @@ class _UserGrowthChartState extends State<UserGrowthChart> {
               ),
             ),
           ),
-        Expanded(
+        SizedBox(
+          height: 200,
           child: LineChart(
             LineChartData(
               lineBarsData: [
