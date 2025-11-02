@@ -29,7 +29,6 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
     'OTHERS & CUSTOM'
   ];
   String _selectedCategory = 'COMMUNITY AND PUBLIC';
-  bool _showOtherCategory = false;
   bool _isSubmitting = false;
 
   Future<void> _pickServiceImage() async {
@@ -173,7 +172,6 @@ class _VendorServiceRegistrationScreenState extends State<VendorServiceRegistrat
                 onChanged: (String? newValue) {
                   setState(() {
                     _selectedCategory = newValue!;
-                    _showOtherCategory = false;
                   });
                 },
               ),

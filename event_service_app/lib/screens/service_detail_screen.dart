@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final DocumentSnapshot serviceDoc;
@@ -120,17 +119,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
 
     return chatId;
-  }
-
-  Future<void> _launchUrl(String urlString) async {
-    final Uri url = Uri.parse(urlString);
-    if (!await launchUrl(url)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open link')),
-        );
-      }
-    }
   }
 
   @override

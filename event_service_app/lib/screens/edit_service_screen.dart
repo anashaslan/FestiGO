@@ -36,7 +36,6 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     'OTHERS & CUSTOM'
   ];
   late String _selectedCategory;
-  bool _showOtherCategory = false;
 
   @override
   void initState() {
@@ -184,7 +183,6 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedCategory = newValue!;
-                  _showOtherCategory = false;
                 });
               },
             ),
