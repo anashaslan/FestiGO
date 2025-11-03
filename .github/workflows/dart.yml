@@ -63,6 +63,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: event_service_app/build/ios/iphoneos/FlutterIpaExport.ipa
-          tag: v1.0
+          tag: v1.1
           overwrite: true
-          body: "iOS Release Build - FestiGO v1.0"
+          body: "iOS Release Build - FestiGO v1.1"
