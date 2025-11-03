@@ -26,6 +26,31 @@ class _VendorBookingsScreenState extends State<VendorBookingsScreen> {
     }
   }
 
+  Future<Map<String, dynamic>> _getCustomerData(String? customerId) async {
+    if (customerId == null) {
+      return {'name': 'Unknown Customer'};
+    }
+
+    try {
+      final customerDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(customerId)
+          .get();
+      
+      if (customerDoc.exists) {
+        final customerData = customerDoc.data() as Map<String, dynamic>;
+        return {
+          'name': customerData['name'] ?? 'Customer',
+          'email': customerData['email'],
+        };
+      }
+    } catch (e) {
+      debugPrint('Error fetching customer data: $e');
+    }
+    
+    return {'name': 'Customer'};
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -137,26 +162,37 @@ class _VendorBookingsScreenState extends State<VendorBookingsScreen> {
 
                           return Card(
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            child: ListTile(
-                              title: Text(booking['serviceName'] ?? 'Unknown Service'),
-                              subtitle: Text(
-                                'From: ${booking['customerName'] ?? booking['customerEmail'] ?? booking['customerId'] ?? 'Customer'}\nBooked on: $formattedDate',
-                              ),
-                              isThreeLine: true,
-                              trailing: Chip(
-                                label: Text(
-                                  booking['status'] ?? 'pending',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                backgroundColor: _getStatusColor(booking['status'] ?? 'pending'),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        VendorBookingDetailScreen(bookingId: bookingId),
+                            child: FutureBuilder<Map<String, dynamic>>(
+                              future: _getCustomerData(booking['customerId']),
+                              builder: (context, customerSnapshot) {
+                                final customerName = customerSnapshot.data?['name'] ?? 
+                                                    booking['customerName'] ?? 
+                                                    booking['customerEmail'] ?? 
+                                                    booking['customerId'] ?? 
+                                                    'Customer';
+                                
+                                return ListTile(
+                                  title: Text(booking['serviceName'] ?? 'Unknown Service'),
+                                  subtitle: Text(
+                                    'From: $customerName\nBooked on: $formattedDate',
                                   ),
+                                  isThreeLine: true,
+                                  trailing: Chip(
+                                    label: Text(
+                                      booking['status'] ?? 'pending',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: _getStatusColor(booking['status'] ?? 'pending'),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            VendorBookingDetailScreen(bookingId: bookingId),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),
