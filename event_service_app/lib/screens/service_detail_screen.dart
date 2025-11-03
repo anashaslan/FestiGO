@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
+import '../widgets/profile_avatar.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final DocumentSnapshot serviceDoc;
@@ -333,15 +334,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
-                                CircleAvatar(
+                                ProfileAvatar(
+                                  imageUrl: vendorData['profileImageUrl'],
+                                  fallbackText: vendorData['name'] ?? 'Vendor',
                                   radius: 30,
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primaryContainer,
-                                  child: Icon(
-                                    Icons.store,
-                                    size: 30,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(

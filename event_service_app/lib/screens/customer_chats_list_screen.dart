@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'chat_screen.dart';
+import '../widgets/profile_avatar.dart';
 
 class CustomerChatsListScreen extends StatelessWidget {
   const CustomerChatsListScreen({super.key});
@@ -14,7 +15,11 @@ class CustomerChatsListScreen extends StatelessWidget {
     );
 
     if (otherUserId == null) {
-      return {'name': 'Unknown User', 'role': 'unknown'};
+      return {
+        'name': 'Unknown User', 
+        'role': 'unknown',
+        'profileImageUrl': null,
+      };
     }
 
     try {
@@ -29,13 +34,18 @@ class CustomerChatsListScreen extends StatelessWidget {
           'name': data['name'] ?? 'Unknown User',
           'role': data['role'] ?? 'user',
           'email': data['email'] ?? '',
+          'profileImageUrl': data['profileImageUrl'],
         };
       }
     } catch (e) {
-      print('Error fetching user  $e');
+      debugPrint('Error fetching user data: $e');
     }
 
-    return {'name': 'Unknown User', 'role': 'unknown'};
+    return {
+      'name': 'Unknown User', 
+      'role': 'unknown',
+      'profileImageUrl': null,
+    };
   }
 
   String _formatTimestamp(Timestamp? timestamp) {
@@ -126,7 +136,11 @@ class CustomerChatsListScreen extends StatelessWidget {
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) {
                     return const ListTile(
-                      leading: CircleAvatar(child: Icon(Icons.person)),
+                      leading: ProfileAvatar(
+                        imageUrl: null,
+                        fallbackText: 'U',
+                        radius: 20,
+                      ),
                       title: Text('Loading...'),
                     );
                   }
@@ -137,14 +151,10 @@ class CustomerChatsListScreen extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: isVendor
-                            ? Colors.purple.shade100
-                            : Colors.blue.shade100,
-                        child: Icon(
-                          isVendor ? Icons.store : Icons.person,
-                          color: isVendor ? Colors.purple : Colors.blue,
-                        ),
+                      leading: ProfileAvatar(
+                        imageUrl: otherUser['profileImageUrl'],
+                        fallbackText: otherUser['name'] as String,
+                        radius: 20,
                       ),
                       title: Row(
                         children: [
